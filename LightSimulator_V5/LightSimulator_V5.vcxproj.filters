@@ -1,0 +1,193 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Source Files\guiManager">
+      <UniqueIdentifier>{906a295d-eebd-4e24-9b71-f4d711d70fbf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\main">
+      <UniqueIdentifier>{a4a7e99c-030e-44bb-9e19-9e60690271c9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\objectManager">
+      <UniqueIdentifier>{645dd8ff-91a6-422a-a7e0-1e59979b7e05}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\program">
+      <UniqueIdentifier>{9f289578-2e26-4904-b662-c5497c43f7d2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\renderers">
+      <UniqueIdentifier>{b8ec6739-48c4-42b3-8ea6-78268d61be55}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\resourceManager">
+      <UniqueIdentifier>{d3065b73-c6e1-4660-bfdc-163d0d4032c9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\shader">
+      <UniqueIdentifier>{d76d5afc-79db-4c4a-8d90-27e2b9d45f4f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\resourceManager\texture">
+      <UniqueIdentifier>{c6f968b8-d024-44e7-937f-2b0651ba4ab7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\objectManager\object">
+      <UniqueIdentifier>{46e7ab04-1bec-45ad-be06-4f8d35e16d40}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\objectManager\object\lightObject">
+      <UniqueIdentifier>{b75fe319-3a50-4a9a-b060-5f84ac17dd9b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\shader\shaderFiles">
+      <UniqueIdentifier>{255a1ce4-6e8d-4e8a-9c36-79e696ea6ef5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\renderers\rayRenderer">
+      <UniqueIdentifier>{3c6c1b39-e64c-4140-97ee-7c9628967532}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\renderers\spriteRenderer">
+      <UniqueIdentifier>{93807368-8973-45d1-9551-d5955bc10a90}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\imgui">
+      <UniqueIdentifier>{cc186116-a986-4dc1-ad60-c992a48e9a55}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\..\Desktop\OpenGL\glad\src\glad.c">
+      <Filter>Resource Files</Filter>
+    </ClCompile>
+    <ClCompile Include="guiManager\guiManager.cpp">
+      <Filter>Source Files\guiManager</Filter>
+    </ClCompile>
+    <ClCompile Include="main\main.cpp">
+      <Filter>Source Files\main</Filter>
+    </ClCompile>
+    <ClCompile Include="objectManager\objectManager.cpp">
+      <Filter>Source Files\objectManager</Filter>
+    </ClCompile>
+    <ClCompile Include="resourceManager\resourceManager.cpp">
+      <Filter>Source Files\resourceManager</Filter>
+    </ClCompile>
+    <ClCompile Include="shader\shader.cpp">
+      <Filter>Source Files\shader</Filter>
+    </ClCompile>
+    <ClCompile Include="program\program.cpp">
+      <Filter>Source Files\program</Filter>
+    </ClCompile>
+    <ClCompile Include="resourceManager\texture\texture.cpp">
+      <Filter>Source Files\resourceManager\texture</Filter>
+    </ClCompile>
+    <ClCompile Include="objectManager\object\object.cpp">
+      <Filter>Source Files\objectManager\object</Filter>
+    </ClCompile>
+    <ClCompile Include="objectManager\object\lightObject\lightObject.cpp">
+      <Filter>Source Files\objectManager\object\lightObject</Filter>
+    </ClCompile>
+    <ClCompile Include="renderers\rayRenderer\RayRenderer.cpp">
+      <Filter>Source Files\renderers\rayRenderer</Filter>
+    </ClCompile>
+    <ClCompile Include="renderers\spriteRenderer\SpriteRenderer.cpp">
+      <Filter>Source Files\renderers\spriteRenderer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Desktop\OpenGL\imgui\imgui.cpp">
+      <Filter>Source Files\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Desktop\OpenGL\imgui\imgui_demo.cpp">
+      <Filter>Source Files\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Desktop\OpenGL\imgui\imgui_draw.cpp">
+      <Filter>Source Files\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Desktop\OpenGL\imgui\imgui_impl_glfw.cpp">
+      <Filter>Source Files\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Desktop\OpenGL\imgui\imgui_impl_opengl3.cpp">
+      <Filter>Source Files\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Desktop\OpenGL\imgui\imgui_widgets.cpp">
+      <Filter>Source Files\imgui</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="guiManager\guiManager.h">
+      <Filter>Source Files\guiManager</Filter>
+    </ClInclude>
+    <ClInclude Include="objectManager\object\object.h">
+      <Filter>Source Files\objectManager\object</Filter>
+    </ClInclude>
+    <ClInclude Include="objectManager\object\lightObject\lightObject.h">
+      <Filter>Source Files\objectManager\object\lightObject</Filter>
+    </ClInclude>
+    <ClInclude Include="objectManager\objectManager.h">
+      <Filter>Source Files\objectManager</Filter>
+    </ClInclude>
+    <ClInclude Include="program\program.h">
+      <Filter>Source Files\program</Filter>
+    </ClInclude>
+    <ClInclude Include="resourceManager\texture\texture.h">
+      <Filter>Source Files\resourceManager\texture</Filter>
+    </ClInclude>
+    <ClInclude Include="resourceManager\resourceManager.h">
+      <Filter>Source Files\resourceManager</Filter>
+    </ClInclude>
+    <ClInclude Include="shader\shader.h">
+      <Filter>Source Files\shader</Filter>
+    </ClInclude>
+    <ClInclude Include="renderers\rayRenderer\RayRenderer.h">
+      <Filter>Source Files\renderers\rayRenderer</Filter>
+    </ClInclude>
+    <ClInclude Include="renderers\spriteRenderer\SpriteRenderer.h">
+      <Filter>Source Files\renderers\spriteRenderer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Desktop\OpenGL\imgui\imconfig.h">
+      <Filter>Source Files\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Desktop\OpenGL\imgui\imgui.h">
+      <Filter>Source Files\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Desktop\OpenGL\imgui\imgui_impl_glfw.h">
+      <Filter>Source Files\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Desktop\OpenGL\imgui\imgui_impl_opengl3.h">
+      <Filter>Source Files\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Desktop\OpenGL\imgui\imgui_internal.h">
+      <Filter>Source Files\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Desktop\OpenGL\imgui\imstb_rectpack.h">
+      <Filter>Source Files\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Desktop\OpenGL\imgui\imstb_textedit.h">
+      <Filter>Source Files\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Desktop\OpenGL\imgui\imstb_truetype.h">
+      <Filter>Source Files\imgui</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="block.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="block_solid.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="shader\shaderFiles\fShader.txt">
+      <Filter>Source Files\shader\shaderFiles</Filter>
+    </Text>
+    <Text Include="shader\shaderFiles\rfShader.txt">
+      <Filter>Source Files\shader\shaderFiles</Filter>
+    </Text>
+    <Text Include="shader\shaderFiles\rvShader.txt">
+      <Filter>Source Files\shader\shaderFiles</Filter>
+    </Text>
+    <Text Include="shader\shaderFiles\vShader.txt">
+      <Filter>Source Files\shader\shaderFiles</Filter>
+    </Text>
+  </ItemGroup>
+</Project>
