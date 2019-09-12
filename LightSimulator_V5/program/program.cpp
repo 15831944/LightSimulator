@@ -18,7 +18,7 @@ Program::~Program()
 void Program::Init()
 {
 	//Set background colour.
-	backgroundColour = glm::vec3(0.15f, 0.15f, 0.15f);
+	backgroundColour = glm::vec3(0.10f, 0.10f, 0.10f);
 	//Create orthographic projection matrix.
 	projection = glm::ortho(0.0f, static_cast<float>(this->Width), static_cast<float>(this->Height), 0.0f, -1.0f, 1.0f);
 	// Load shaders
@@ -32,6 +32,7 @@ void Program::Init()
 	// Load textures
 	ResourceManager::LoadTexture("block_solid.png", GL_TRUE, "sblock");
 	ResourceManager::LoadTexture("block.png", GL_TRUE, "block");
+	ResourceManager::LoadTexture("angleIndicatorIcon.png", GL_TRUE, "angleIndicator");
 	// Set render-specific controls
 	Shader quadShader;
 	Shader rayShader;

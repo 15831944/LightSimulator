@@ -1,4 +1,5 @@
 #include "guiManager.h"
+#include <cstdio>
 
 guiManager::guiManager() {
 	
@@ -15,7 +16,7 @@ void guiManager::renderNewFrame() {
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
 
-void guiManager::createObjectDetailsWindow(Object *&ob, lightObject *&lightOb) {
+void guiManager::createObjectDetailsWindow(Object *&ob, lightObject *&lightOb, angleIndicator *&ind) {
 	ImGui::Begin("Object Info");
 	ImGui::SetWindowPos(objectInfoWindowPos);
 	ImGui::SetWindowSize(objectInfoWindowSize);
@@ -32,6 +33,19 @@ void guiManager::createObjectDetailsWindow(Object *&ob, lightObject *&lightOb) {
 		ImGui::SliderFloat("R", &lightOb->rayColour.r, 0.0f, 1.0f);
 		ImGui::SliderFloat("G", &lightOb->rayColour.g, 0.0f, 1.0f);
 		ImGui::SliderFloat("B", &lightOb->rayColour.b, 0.0f, 1.0f);
+	}
+	else if (ind != nullptr) {
+		std::string a1, a2, ri1, ri2;
+
+		a1 = "Incident angle: " + (std::to_string(*&ind->iAngle));
+		a2 = "Reflected/Refracted angle: " + (std::to_string(*&ind->rAngle));
+		ri1 = "Refractive index 1: " + (std::to_string(*&ind->n1));
+		ri2 = "Refractive index 2: " + (std::to_string(*&ind->n2));
+
+		ImGui::Text(a1.c_str());
+		ImGui::Text(a2.c_str());
+		ImGui::Text(ri1.c_str());
+		ImGui::Text(ri2.c_str());
 	}
 	ImGui::End();
 }

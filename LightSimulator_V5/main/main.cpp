@@ -8,9 +8,7 @@
 #include "program/program.h"
 #include "resourceManager/resourceManager.h"
 
-//Total lines of code: 1,603
-//TODO: ADD ZOOMING AND PANNING
-
+//TODO: PREVENT OVERLAPPING OBJECTS WHEN MOVING THEM (USE HIT DETECTION).
 
 // GLFW function declerations
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode);
@@ -55,6 +53,10 @@ int main(int argc, char *argv[])
 
 	// OpenGL configuration
 	glViewport(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+	
+	//allows for rendering transparent textures.
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	// Initialize game
 	Simulator.Init();

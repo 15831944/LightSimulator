@@ -25,19 +25,22 @@ objectManager::~objectManager() {
 void objectManager::selectObject(glm::vec3 coords, bool hasInput, bool eKey, bool rKey) {
 	//if the user clicks
 	if (hasInput) {
+		//selectedIndicator, selectedLight, selectedObject = nullptr;
 		unsigned int index = 0;
 		glm::vec3 intersectionPoint;
 		glm::vec3 direct = glm::vec3(0.0f, 0.0f, -1.0f);
-		if (selectedLight != nullptr && selectedObject != nullptr) {
+		if ((selectedLight != nullptr && selectedObject != nullptr) || (selectedIndicator != nullptr && selectedObject != nullptr)) {
 			selectedObject = nullptr;
 		}
-		if (selectedObject == nullptr && selectedLight == nullptr) {
-			for (unsigned int i = 0; i < objList.size(); i++) {
-				if (castRay3D(coords, direct, index, &this->selectedObject, intersectionPoint)) {
+
+		if (selectedIndicator == nullptr) {
+			for (unsigned int i = 0; i < angList.size(); i++) {
+				if (castRay3D(coords, direct, index, &this->selectedIndicator, intersectionPoint)) {
 					break;
 				}
 			}
 		}
+
 		if (selectedLight == nullptr) {
 			for (unsigned int i = 0; i < lightList.size(); i++) {
 				if (castRay3D(coords, direct, index, &this->selectedLight, intersectionPoint)) {
@@ -46,7 +49,13 @@ void objectManager::selectObject(glm::vec3 coords, bool hasInput, bool eKey, boo
 			}
 		}
 
-		
+		if (selectedObject == nullptr && selectedLight == nullptr && selectedIndicator == nullptr) {
+			for (unsigned int i = 0; i < objList.size(); i++) {
+				if (castRay3D(coords, direct, index, &this->selectedObject, intersectionPoint)) {
+					break;
+				}
+			}
+		}
 	}
 	//if no click
 	else {
@@ -69,6 +78,7 @@ void objectManager::selectObject(glm::vec3 coords, bool hasInput, bool eKey, boo
 void objectManager::deselectObject() {
 	this->selectedObject = nullptr;
 	this->selectedLight = nullptr;
+	this->selectedIndicator = nullptr;
 }
 
 void objectManager::addObject(glm::vec2 oPos, glm::vec2 oSize, std::string oTex) {
@@ -77,6 +87,10 @@ void objectManager::addObject(glm::vec2 oPos, glm::vec2 oSize, std::string oTex)
 
 void objectManager::addLight(glm::vec2 lPos, glm::vec2 lSize, std::string lTex) {
 	this->lightList.push_back(new lightObject(lPos, lSize, ResourceManager::GetTexture(lTex)));
+}
+
+void objectManager::addAngleIndicator(float angle1, float angle2, float n1, float n2, glm::vec2 aPos, glm::vec2 aSize, std::string aTex) {
+	this->angList.push_back(new angleIndicator(angle1, angle2, n1, n2, aPos, aSize, ResourceManager::GetTexture(aTex)));
 }
 
 glm::vec2 objectManager::doReflection(const glm::vec2 &incidentRay, const glm::vec2 &intersectionNormal) {
@@ -130,7 +144,6 @@ void objectManager::fresnel(const glm::vec2 direction, const glm::vec2 normal, c
 
 }
 
-//THIS IS THE ISSUE: FIX BY ALLOWING TO CALCULATE NORMAL OF INTERNAL INTERSECTIONS
 glm::vec2 objectManager::calculateNormal(glm::vec2 intersectionPoint, Object aabb) {
 	float epsilon = 0.01f;
 	if (abs(intersectionPoint[0] - aabb.Position[0]) < epsilon) {
@@ -153,6 +166,26 @@ glm::vec2 objectManager::calculateNormal(glm::vec2 intersectionPoint, Object aab
 		//only returns if the calculation fails.
 		return glm::vec2(0, 0);
 	}
+}
+
+bool objectManager::castRay3D(glm::vec3 &orig, glm::vec3 &dir, unsigned int &tIndex, angleIndicator** hitObject, glm::vec3 &intersectionPt) {
+	glm::vec3 testIntersection;
+	float lowestFraction = 1;
+	float testLowestFraction;
+
+	for (unsigned int i = 0; i < angList.size(); i++) {
+		if (angList[i]->CalculateRayCollision3D(orig, dir, testIntersection, testLowestFraction) && testLowestFraction < lowestFraction) {
+			*hitObject = angList[i];
+			intersectionPt = testIntersection;
+			lowestFraction = testLowestFraction;
+			tIndex = i;
+		}
+	}
+
+	if (lowestFraction < 1) {
+		return true;
+	}
+	return false;
 }
 
 bool objectManager::castRay3D(glm::vec3 &orig, glm::vec3 &dir, unsigned int &tIndex, Object** hitObject, glm::vec3 &intersectionPt) {
@@ -215,6 +248,7 @@ bool objectManager::castRay(glm::vec2 &orig, glm::vec2 &dir, unsigned int &tInde
 	return false;
 }
 
+//Makes sure that ray tracing works when the ray origin is inside an object.
 void objectManager::checkRefIndex(lightObject* theLight, glm::vec2 theOrigin) {
 	for (unsigned int i = 0; i < objList.size(); i++) {
 		if (objList[i]->isRayInsideObject(theOrigin)) {
@@ -224,6 +258,10 @@ void objectManager::checkRefIndex(lightObject* theLight, glm::vec2 theOrigin) {
 			theLight->currentRefractiveIndex = 1.0f;
 		}
 	}
+}
+
+float objectManager::calcAngle(glm::vec2 vec1, glm::vec2 vec2) {
+	return (std::acos(glm::dot(vec1, vec2)) * 180/3.141592654); //No need to divide by magnitude since both vec1 and vec2 are unit vectors.
 }
 
 void objectManager::traceRay(lightObject* currentLight, glm::vec2 &origin, glm::vec2 &direction, unsigned int depth) {	
@@ -239,13 +277,18 @@ void objectManager::traceRay(lightObject* currentLight, glm::vec2 &origin, glm::
 		if (castRay(origin, direction, index, &hitObject, intersectionPoint)) {
 			currentLight->DrawRay(*rRenderer, origin, intersectionPoint);
 			glm::vec2 normal = calculateNormal(intersectionPoint, *hitObject);
-
+			currentLight->DrawRay(*rRenderer, intersectionPoint - normal * 50.0f, intersectionPoint + normal * 50.0f);
 			//Reflection and Refraction
 			glm::vec2 reflectionDirection = glm::normalize(doReflection(direction, normal));
 			glm::vec2 refractionDirection = glm::normalize(doRefraction(direction, normal, currentLight->currentRefractiveIndex, hitObject->refractiveIndex));
 			
 			glm::vec2 reflectionRayOrigin = (glm::dot(reflectionDirection, normal) < 0) ? intersectionPoint - normal * 0.01f : intersectionPoint + normal * 0.01f;
 			glm::vec2 refractionRayOrigin = (glm::dot(glm::normalize(refractionDirection), normal) < 0) ? intersectionPoint - normal * 0.01f : intersectionPoint + normal * 0.01f;
+
+			//Add angle indicator here
+			//Fix swapping the displayed order of refractive indexes.
+			addAngleIndicator(calcAngle(normal, -direction), calcAngle(normal, -refractionDirection), currentLight->currentRefractiveIndex, hitObject->refractiveIndex, intersectionPoint, glm::vec2(30.0f, 30.0f), "angleIndicator");
+
 
 			traceRay(currentLight, refractionRayOrigin, refractionDirection, depth + 1);
 			//traceRay(currentLight, reflectionRayOrigin, reflectionDirection, depth + 1);
@@ -257,20 +300,31 @@ void objectManager::traceRay(lightObject* currentLight, glm::vec2 &origin, glm::
 }
 
 void objectManager::drawAll() {
+	angList.clear();//Clear any angle indicator objects from the previous frame.
+
+	//draw all objects.
 	for (unsigned int i = 0; i < objList.size(); i++) {
 		objList[i]->Draw(*Renderer);
 	}
+	//draw all light sources and carry out ray tracing.
 	for (unsigned int i = 0; i < lightList.size(); i++) {
 		lightList[i]->Draw(*Renderer);
 		checkRefIndex(lightList[i], lightList[i]->rayOrigin);
 		traceRay(lightList[i], lightList[i]->rayOrigin, lightList[i]->rayDirection, 0);
 	}
+	//Render the angle indicators. The user can click on these to view infomation about what happened to the ray after it hit the surface.
+	for (unsigned int i = 0; i < angList.size(); i++) {
+		angList[i]->Draw(*Renderer);
+	}
+	//Booleans used for adding to the scene.
 	bool addLight = false;
 	bool addObject = false;
+	//Render GUI.
 	gui->prepareNewFrame();
-	gui->createObjectDetailsWindow(selectedObject, selectedLight);
+	gui->createObjectDetailsWindow(selectedObject, selectedLight, selectedIndicator);
 	gui->createSceneManagerWindow(addObject, addLight);
 	gui->renderNewFrame();
+	//If the user clicks to add an object, then the object will be added and rendered to the scene on the next frame.
 	if (addLight) {
 		this->addLight(glm::vec2(300.0f, 200.0f), glm::vec2(40.0f, 40.0f), "block");
 	}

@@ -55,6 +55,9 @@
     <Filter Include="Source Files\imgui">
       <UniqueIdentifier>{cc186116-a986-4dc1-ad60-c992a48e9a55}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\objectManager\object\angleIndicator">
+      <UniqueIdentifier>{4e861f64-f3b7-4b38-8a49-6b8c4eb143ef}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\..\Desktop\OpenGL\glad\src\glad.c">
@@ -111,6 +114,12 @@
     <ClCompile Include="..\..\..\..\Desktop\OpenGL\imgui\imgui_widgets.cpp">
       <Filter>Source Files\imgui</Filter>
     </ClCompile>
+    <ClCompile Include="objectManager\object\angleIndicator\angleIndicator.cpp">
+      <Filter>Source Files\objectManager\object\angleIndicator</Filter>
+    </ClCompile>
+    <ClCompile Include="objectManager\object\objectTemplate.cpp">
+      <Filter>Source Files\objectManager\object</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="guiManager\guiManager.h">
@@ -166,6 +175,12 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\Desktop\OpenGL\imgui\imstb_truetype.h">
       <Filter>Source Files\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="objectManager\object\angleIndicator\angleIndicator.h">
+      <Filter>Source Files\objectManager\object\angleIndicator</Filter>
+    </ClInclude>
+    <ClInclude Include="objectManager\object\objectTemplate.h">
+      <Filter>Source Files\objectManager\object</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

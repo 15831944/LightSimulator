@@ -6,7 +6,7 @@
 constexpr auto PI = 3.14159265358979323846264338327f;
 
 lightObject::lightObject(glm::vec2 pos, glm::vec2 size, Texture2D sprite)
-	: Object(pos, size, sprite) {
+	: ObjectTemplate(pos, size, sprite) {
 	//Set default ray colour.
 	rayColour = glm::vec3(1.0f, 1.0f, 1.0f);
 	
@@ -22,17 +22,6 @@ void lightObject::Draw(SpriteRenderer &renderer)
 {
 	renderer.DrawSprite(this->Sprite, this->Position, this->Size, this->Rotation, this->Color);
 }
-
-/*void lightObject::rotateRay(float angle) {
-	float angleRadians = angle * PI / 180.0f;	//convert from degrees to radians
-
-	float tempX = this->rayDirection.x;
-	float tempY = this->rayDirection.y;
-
-	//Use vector rotation equation to calculate a rotated direction vector.
-	this->rayDirection.x = tempX * cos(angleRadians) - tempY * sin(angleRadians);
-	this->rayDirection.y = tempX * sin(angleRadians) + tempY * cos(angleRadians);
-}*/
 
 void lightObject::DrawRay(RayRenderer &renderer, glm::vec2 v0, glm::vec2 v1) {
 	renderer.Draw(v0, v1, this->rayColour);

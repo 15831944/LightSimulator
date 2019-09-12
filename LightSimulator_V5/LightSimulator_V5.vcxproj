@@ -84,6 +84,7 @@
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>C:\Users\James\Desktop\soil\Simple OpenGL Image Library\src;C:\Users\James\source\repos\LightSimulator_V5\LightSimulator_V5;C:\Users\James\Desktop\OpenGL;C:\Users\James\Desktop\OpenGL\glfw-3.2.1\include;C:\Users\James\Desktop\OpenGL\glad\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <AdditionalDependencies>opengl32.lib;glfw3.lib;SOIL.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -106,6 +107,7 @@
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>C:\Users\James\Desktop\soil\Simple OpenGL Image Library\src;C:\Users\James\source\repos\LightSimulator_V5\LightSimulator_V5;C:\Users\James\Desktop\OpenGL;C:\Users\James\Desktop\OpenGL\glfw-3.2.1\include;C:\Users\James\Desktop\OpenGL\glad\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -138,8 +140,10 @@
     <ClCompile Include="guiManager\guiManager.cpp" />
     <ClCompile Include="main\main.cpp" />
     <ClCompile Include="objectManager\objectManager.cpp" />
+    <ClCompile Include="objectManager\object\angleIndicator\angleIndicator.cpp" />
     <ClCompile Include="objectManager\object\lightObject\lightObject.cpp" />
     <ClCompile Include="objectManager\object\object.cpp" />
+    <ClCompile Include="objectManager\object\objectTemplate.cpp" />
     <ClCompile Include="program\program.cpp" />
     <ClCompile Include="renderers\rayRenderer\RayRenderer.cpp" />
     <ClCompile Include="renderers\spriteRenderer\SpriteRenderer.cpp" />
@@ -158,8 +162,10 @@
     <ClInclude Include="..\..\..\..\Desktop\OpenGL\imgui\imstb_truetype.h" />
     <ClInclude Include="guiManager\guiManager.h" />
     <ClInclude Include="objectManager\objectManager.h" />
+    <ClInclude Include="objectManager\object\angleIndicator\angleIndicator.h" />
     <ClInclude Include="objectManager\object\lightObject\lightObject.h" />
     <ClInclude Include="objectManager\object\object.h" />
+    <ClInclude Include="objectManager\object\objectTemplate.h" />
     <ClInclude Include="program\program.h" />
     <ClInclude Include="renderers\rayRenderer\RayRenderer.h" />
     <ClInclude Include="renderers\spriteRenderer\SpriteRenderer.h" />

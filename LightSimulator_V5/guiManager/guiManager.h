@@ -7,6 +7,7 @@
 
 #include "objectManager/object/object.h"
 #include "objectManager/object/lightObject/lightObject.h"
+#include "objectManager/object/angleIndicator/angleIndicator.h"
 
 class guiManager {
 public:
@@ -16,12 +17,12 @@ public:
 	ImVec2 objectInfoWindowPos = ImVec2(800.0f, 10.0f);
 	ImVec2 objectInfoWindowSize = ImVec2(400.0f, 200.0f);
 	ImVec2 sceneManagerWindowPos = ImVec2(10.0f, 10.0f);
-	ImVec2 sceneManagerWindowSize = ImVec2(200.0f, 980.0f);
+	ImVec2 sceneManagerWindowSize = ImVec2(200.0f, 200.0f);
 
 	guiManager();
 	void prepareNewFrame();
 	void renderNewFrame();
-	void createObjectDetailsWindow(Object *&ob, lightObject *&lightOb);
+	void createObjectDetailsWindow(Object *&ob, lightObject *&lightOb, angleIndicator *&ind);
 	void createSceneManagerWindow(bool &addOb, bool &addlightOb);
 	void createDemoWindow();
 };
