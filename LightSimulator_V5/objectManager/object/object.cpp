@@ -62,3 +62,12 @@ bool Object::CalculateRayCollision(glm::vec2 &rOrigin, glm::vec2 &rDir, glm::vec
 
 	return true;
 }
+
+bool Object::calculateAABBcollision(Object &object1, Object &object2) {
+	//Check if collide on X axis.
+	bool collisionX = object1.Position.x + object1.Size.x >= object2.Position.x && object2.Position.x + object2.Size.x >= object1.Position.x;
+	//Check if collide on Y axis.
+	bool collisionY = object1.Position.y + object1.Size.y >= object2.Position.y && object2.Position.y + object2.Size.y >= object1.Position.y;
+	//If collision on both axes, then objects collide with eachother.
+	return collisionX && collisionY;
+}

@@ -42,12 +42,12 @@ void Program::Init()
 	oManager = new objectManager(quadShader, rayShader);
 	//create default objects
 	oManager->addObject(glm::vec2(900, 550), glm::vec2(200, 200), "sblock");
-	oManager->addLight(glm::vec2(400, 570), glm::vec2(40, 40), "block");
+	oManager->addLight(glm::vec2(500, 570), glm::vec2(40, 40), "block");
 }
 
 void Program::Update(GLfloat dt)
 {
-	oManager->selectObject(glm::vec3((float)mouseX, (float)mouseY, 1.0f), false, Keys[GLFW_KEY_E], Keys[GLFW_KEY_R]);
+	//oManager->selectObject(glm::vec3((float)mouseX, (float)mouseY, 1.0f), false, this->mouse[GLFW_MOUSE_BUTTON_1], Keys[GLFW_KEY_E], Keys[GLFW_KEY_R]);
 }
 
 
@@ -55,15 +55,11 @@ void Program::ProcessInput(GLfloat dt)
 {
 	if(this->State == PROGRAM_ACTIVE) {
 		//select and deselect objects.
-		if(this->mouse[GLFW_MOUSE_BUTTON_1]) {
-			oManager->selectObject(glm::vec3((float)mouseX, (float)mouseY, 1.0f), true, Keys[GLFW_KEY_E], Keys[GLFW_KEY_R]);
-			//this->mouse[GLFW_MOUSE_BUTTON_1] = 0;
-		}
-		
-		if (this->mouse[GLFW_MOUSE_BUTTON_2]) {
-			oManager->deselectObject();
-			//this->mouse[GLFW_MOUSE_BUTTON_2] = 0;
-		}
+		/*if(this->mouse[GLFW_MOUSE_BUTTON_1]) {
+			oManager->selectObject(glm::vec3((float)mouseX, (float)mouseY, 1.0f), true, this->mouse[GLFW_MOUSE_BUTTON_1], Keys[GLFW_KEY_E], Keys[GLFW_KEY_R]);
+		}*/
+
+		oManager->selectObject(glm::vec3((float)mouseX, (float)mouseY, 1.0f), this->mouse[GLFW_MOUSE_BUTTON_1], this->mouse[GLFW_MOUSE_BUTTON_2]);
 
 		//Dynamically adding objects
 		if (this->mouse[GLFW_MOUSE_BUTTON_3]) {

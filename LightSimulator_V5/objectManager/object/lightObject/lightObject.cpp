@@ -1,4 +1,6 @@
 #include "lightObject.h"
+#include "resourceManager/resourceManager.h"
+#include "objectManager/objectManager.h"
 #include <algorithm>
 #include <math.h>
 #include <iostream>
@@ -16,11 +18,15 @@ lightObject::lightObject(glm::vec2 pos, glm::vec2 size, Texture2D sprite)
 	//set ray origin points at center of light object.
 	rayOrigin.x = 0.5f * size.x + pos.x;
 	rayOrigin.y = 0.5f * size.y + pos.y;
+	//Add an object that the lightObject will rotate towards.
+	directionIndicator = new ObjectTemplate(rayOrigin + rayDirection * 100.0f, glm::vec2(20.0f, 20.0f), ResourceManager::GetTexture("angleIndicator"));
+	rotateToIndicator();
 }
 
 void lightObject::Draw(SpriteRenderer &renderer)
 {
 	renderer.DrawSprite(this->Sprite, this->Position, this->Size, this->Rotation, this->Color);
+	renderer.DrawSprite(this->directionIndicator->Sprite, this->directionIndicator->Position, this->directionIndicator->Size, this->directionIndicator->Rotation, this->directionIndicator->Color);
 }
 
 void lightObject::DrawRay(RayRenderer &renderer, glm::vec2 v0, glm::vec2 v1) {
@@ -49,6 +55,21 @@ void lightObject::rotateToMouse(glm::vec3 coords) {
 	glm::vec2 directionVec = glm::normalize(coords2D - this->rayOrigin);//calculate new direction vector.
 	float angle = calculateAngle(directionVec, glm::vec2(0.0f, -1.0f));//calc angle between north and direction vector.
 	
+	if (directionVec.x < 0) //if thex value is negative, then the angle is reflex.
+	{
+		this->rotateObject((PI * 2) - angle);//calculate reflex angle (from PI to 2*PI).
+	}
+	else {
+		this->rotateObject(angle);//calculate normal angle (from 0 to PI).
+	}
+	this->rayDirection = directionVec;//set new direction vector for the light ray.
+}
+
+void lightObject::rotateToIndicator() {
+	glm::vec2 coords2D = glm::vec2(this->directionIndicator->Position.x + (this->directionIndicator->Size.x / 2), this->directionIndicator->Position.y + (this->directionIndicator->Size.y / 2));
+	glm::vec2 directionVec = glm::normalize(coords2D - this->rayOrigin);//calculate new direction vector.
+	float angle = calculateAngle(directionVec, glm::vec2(0.0f, -1.0f));//calc angle between north and direction vector.
+
 	if (directionVec.x < 0) //if thex value is negative, then the angle is reflex.
 	{
 		this->rotateObject((PI * 2) - angle);//calculate reflex angle (from PI to 2*PI).

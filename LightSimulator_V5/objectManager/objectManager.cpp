@@ -14,6 +14,7 @@ objectManager::objectManager(Shader quadShader, Shader rayShader) {
 	Renderer = new SpriteRenderer(quadShader);
 	rRenderer = new RayRenderer(rayShader);
 	gui = new guiManager();
+	selState = choose;
 }
 
 objectManager::~objectManager() {
@@ -22,15 +23,18 @@ objectManager::~objectManager() {
 	delete gui;
 }
 
-void objectManager::selectObject(glm::vec3 coords, bool hasInput, bool eKey, bool rKey) {
-	//if the user clicks
-	if (hasInput) {
-		//selectedIndicator, selectedLight, selectedObject = nullptr;
-		unsigned int index = 0;
-		glm::vec3 intersectionPoint;
-		glm::vec3 direct = glm::vec3(0.0f, 0.0f, -1.0f);
-		if ((selectedLight != nullptr && selectedObject != nullptr) || (selectedIndicator != nullptr && selectedObject != nullptr)) {
-			selectedObject = nullptr;
+void objectManager::selectObject(glm::vec3 coords, bool mouse1, bool mouse2) {
+	unsigned int index = 0;
+	glm::vec3 intersectionPoint;
+	glm::vec3 direct = glm::vec3(0.0f, 0.0f, -1.0f);
+	if (mouse1 && selState == choose) {
+		deselectObject();
+		if (selectedDirection == nullptr) {
+			for (unsigned int i = 0; i < dirList.size(); i++) {
+				if (castRay3D(coords, direct, index, &this->selectedDirection, intersectionPoint)) {
+					break;
+				}
+			}
 		}
 
 		if (selectedIndicator == nullptr) {
@@ -56,29 +60,59 @@ void objectManager::selectObject(glm::vec3 coords, bool hasInput, bool eKey, boo
 				}
 			}
 		}
+		selState = move;
 	}
-	//if no click
-	else {
-		if (selectedObject != nullptr && eKey) {
-			if (selectedLight == nullptr) {
-				this->selectedObject->moveObject(coords);
-				//this->selectedObject->rotateObject();
+	if (selState == move) {
+		if (selectedObject != nullptr) {
+			if (selectedDirection == nullptr) {
+				if (selectedLight == nullptr) {
+					this->selectedObject->moveObject(coords);
+				}
 			}
 		}
-		if (selectedLight != nullptr && eKey) {
-			this->selectedLight->moveObject(coords);
+		if (selectedDirection == nullptr) {
+			if (selectedLight != nullptr) {
+				this->selectedLight->moveObject(coords);
+			}
 		}
-		if (selectedLight != nullptr && rKey) {
-			this->selectedLight->rotateToMouse(coords);
+		
+		if (selectedDirection != nullptr) {
+			this->selectedDirection->moveObject(coords);
+		}
+
+		if (!mouse1) {
+			selState = rotate;
 		}
 	}
+	if (selState == rotate) {
+		for (unsigned int i = 0; i < lightList.size(); i++) {
+			this->lightList[i]->rotateToIndicator();
+		}
+		if (selectedLight != nullptr) {
+			this->selectedLight->rotateToIndicator();
+		}
+		else if (selectedLight == nullptr) {
+			//deselectObject();
+			selState = edit;
+		}
+		if (mouse1) {
+			//deselectObject();
+			selState = edit;
+		}
+	}
+	if (selState == edit) {
+		if (mouse1) {
+			selState = choose;
+		}
+		
+	}
 }
-
 
 void objectManager::deselectObject() {
 	this->selectedObject = nullptr;
 	this->selectedLight = nullptr;
 	this->selectedIndicator = nullptr;
+	this->selectedDirection = nullptr;
 }
 
 void objectManager::addObject(glm::vec2 oPos, glm::vec2 oSize, std::string oTex) {
@@ -87,6 +121,7 @@ void objectManager::addObject(glm::vec2 oPos, glm::vec2 oSize, std::string oTex)
 
 void objectManager::addLight(glm::vec2 lPos, glm::vec2 lSize, std::string lTex) {
 	this->lightList.push_back(new lightObject(lPos, lSize, ResourceManager::GetTexture(lTex)));
+	this->dirList.push_back(lightList[lightList.size()-1]->directionIndicator);
 }
 
 void objectManager::addAngleIndicator(float angle1, float angle2, float n1, float n2, glm::vec2 aPos, glm::vec2 aSize, std::string aTex) {
@@ -168,6 +203,65 @@ glm::vec2 objectManager::calculateNormal(glm::vec2 intersectionPoint, Object aab
 	}
 }
 
+/*
+template <typename type>
+bool objectManager::castRay3D(glm::vec3 &orig, glm::vec3 &dir, unsigned int &tIndex, int dataType, type** hitObject, glm::vec3 &intersectionPt) {
+	glm::vec3 testIntersection;
+	float lowestFraction = 1;
+	float testLowestFraction;
+
+	switch (dataType) {
+	case 0: 
+		for (unsigned int i = 0; i < dirList.size(); i++) {
+			if (dirList[i]->CalculateRayCollision3D(orig, dir, testIntersection, testLowestFraction) && testLowestFraction < lowestFraction) {
+				*hitObject = angList[i];
+				intersectionPt = testIntersection;
+				lowestFraction = testLowestFraction;
+				tIndex = i;
+			}
+		}
+		break;
+
+	case 1: 
+		for (unsigned int i = 0; i < objList.size(); i++) {
+			if (objList[i]->CalculateRayCollision3D(orig, dir, testIntersection, testLowestFraction) && testLowestFraction < lowestFraction) {
+				*hitObject = objList[i];
+				intersectionPt = testIntersection;
+				lowestFraction = testLowestFraction;
+				tIndex = i;
+			}
+		}
+		break;
+
+	case 2: 
+		for (unsigned int i = 0; i < lightList.size(); i++) {
+			if (lightList[i]->CalculateRayCollision3D(orig, dir, testIntersection, testLowestFraction) && testLowestFraction < lowestFraction) {
+				*hitObject = lightList[i];
+				intersectionPt = testIntersection;
+				lowestFraction = testLowestFraction;
+				tIndex = i;
+			}
+		}
+		break;
+
+	case 3: 
+		for (unsigned int i = 0; i < angList.size(); i++) {
+			if (angList[i]->CalculateRayCollision3D(orig, dir, testIntersection, testLowestFraction) && testLowestFraction < lowestFraction) {
+				*hitObject = angList[i];
+				intersectionPt = testIntersection;
+				lowestFraction = testLowestFraction;
+				tIndex = i;
+			}
+		}
+		break;
+	}
+
+	if (lowestFraction < 1) {
+		return true;
+	}
+	return false;
+}*/
+
 bool objectManager::castRay3D(glm::vec3 &orig, glm::vec3 &dir, unsigned int &tIndex, angleIndicator** hitObject, glm::vec3 &intersectionPt) {
 	glm::vec3 testIntersection;
 	float lowestFraction = 1;
@@ -176,6 +270,26 @@ bool objectManager::castRay3D(glm::vec3 &orig, glm::vec3 &dir, unsigned int &tIn
 	for (unsigned int i = 0; i < angList.size(); i++) {
 		if (angList[i]->CalculateRayCollision3D(orig, dir, testIntersection, testLowestFraction) && testLowestFraction < lowestFraction) {
 			*hitObject = angList[i];
+			intersectionPt = testIntersection;
+			lowestFraction = testLowestFraction;
+			tIndex = i;
+		}
+	}
+
+	if (lowestFraction < 1) {
+		return true;
+	}
+	return false;
+}
+
+bool objectManager::castRay3D(glm::vec3 &orig, glm::vec3 &dir, unsigned int &tIndex, ObjectTemplate** hitObject, glm::vec3 &intersectionPt) {
+	glm::vec3 testIntersection;
+	float lowestFraction = 1;
+	float testLowestFraction;
+
+	for (unsigned int i = 0; i < dirList.size(); i++) {
+		if (dirList[i]->CalculateRayCollision3D(orig, dir, testIntersection, testLowestFraction) && testLowestFraction < lowestFraction) {
+			*hitObject = dirList[i];
 			intersectionPt = testIntersection;
 			lowestFraction = testLowestFraction;
 			tIndex = i;
@@ -202,10 +316,7 @@ bool objectManager::castRay3D(glm::vec3 &orig, glm::vec3 &dir, unsigned int &tIn
 		}
 	}
 
-	if (lowestFraction < 1) {
-		return true;
-	}
-	return false;
+	return lowestFraction < 1;
 }
 
 bool objectManager::castRay3D(glm::vec3 &orig, glm::vec3 &dir, unsigned int &tIndex, lightObject** hitObject, glm::vec3 &intersectionPt) {
@@ -321,14 +432,14 @@ void objectManager::drawAll() {
 	bool addObject = false;
 	//Render GUI.
 	gui->prepareNewFrame();
-	gui->createObjectDetailsWindow(selectedObject, selectedLight, selectedIndicator);
-	gui->createSceneManagerWindow(addObject, addLight);
+	//gui->createObjectDetailsWindow(selectedObject, selectedLight, selectedIndicator);
+	gui->createSceneManagerWindow(addObject, addLight, selectedObject, selectedLight, selectedIndicator);
 	gui->renderNewFrame();
 	//If the user clicks to add an object, then the object will be added and rendered to the scene on the next frame.
 	if (addLight) {
-		this->addLight(glm::vec2(300.0f, 200.0f), glm::vec2(40.0f, 40.0f), "block");
+		this->addLight(glm::vec2(500.0f, 200.0f), glm::vec2(40.0f, 40.0f), "block");
 	}
 	else if (addObject) {
-		this->addObject(glm::vec2(400.0f, 200.0f), glm::vec2(100.0f, 100.0f), "sblock");
+		this->addObject(glm::vec2(800.0f, 200.0f), glm::vec2(100.0f, 100.0f), "sblock");
 	}
 }

@@ -8,7 +8,7 @@
 #include "program/program.h"
 #include "resourceManager/resourceManager.h"
 
-//TODO: PREVENT OVERLAPPING OBJECTS WHEN MOVING THEM (USE HIT DETECTION).
+//TODO: MAKE A "POINT TOWARDS" OBJECT FOR LIGHT RAYS SO ROTATES TO THAT OBJECT INSTEAD OF MOUSE.
 
 // GLFW function declerations
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode);
@@ -17,14 +17,14 @@ void cursor_position_callback(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 
 // The Width of the screen
-const GLuint SCREEN_WIDTH = 1200;
+const GLuint SCREEN_WIDTH = 1920;
 // The height of the screen
-const GLuint SCREEN_HEIGHT = 1000;
+const GLuint SCREEN_HEIGHT = 1080;
 
 Program Simulator(SCREEN_WIDTH, SCREEN_HEIGHT);
 bool firstMouse = true;
-float lastX = 1200.0f / 2.0f;
-float lastY = 1000.0f / 2.0f;
+float lastX = (float)SCREEN_WIDTH / 2.0f;
+float lastY = (float)SCREEN_HEIGHT / 2.0f;
 
 int main(int argc, char *argv[])
 {

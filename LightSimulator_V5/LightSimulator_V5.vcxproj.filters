@@ -69,9 +69,6 @@
     <ClCompile Include="main\main.cpp">
       <Filter>Source Files\main</Filter>
     </ClCompile>
-    <ClCompile Include="objectManager\objectManager.cpp">
-      <Filter>Source Files\objectManager</Filter>
-    </ClCompile>
     <ClCompile Include="resourceManager\resourceManager.cpp">
       <Filter>Source Files\resourceManager</Filter>
     </ClCompile>
@@ -119,6 +116,9 @@
     </ClCompile>
     <ClCompile Include="objectManager\object\objectTemplate.cpp">
       <Filter>Source Files\objectManager\object</Filter>
+    </ClCompile>
+    <ClCompile Include="objectManager\objectManager.cpp">
+      <Filter>Source Files\objectManager</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -9,6 +9,7 @@
 #include "renderers/rayRenderer/RayRenderer.h"
 #include "objectManager/object/object.h"
 #include "objectManager/object/objectTemplate.h"
+#include "resourceManager/resourceManager.h"
 
 //lightObject class inherits from Object class.
 class lightObject : public ObjectTemplate {
@@ -19,6 +20,8 @@ public:
 	glm::vec2 rayOrigin, rayEnd; //(x1, y1)
 	glm::vec3 rayColour;
 
+	ObjectTemplate *directionIndicator = nullptr;
+
 	float currentRefractiveIndex = 1.0f;
 
 	lightObject(glm::vec2 pos, glm::vec2 size, Texture2D sprite);
@@ -28,8 +31,7 @@ public:
 	void rotateObject(float angle);
 	float calculateAngle(glm::vec2 rayDir, glm::vec2 normal);
 	void rotateToMouse(glm::vec3 coords);
-
-	//void clearIntersections(); //Clear after every render loop.
+	void rotateToIndicator();
 };
 
 #endif

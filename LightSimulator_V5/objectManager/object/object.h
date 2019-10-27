@@ -14,6 +14,7 @@ public:
 	
 	//ray to AABB collision detection
 	bool CalculateRayCollision(glm::vec2 &rOrigin, glm::vec2 &rDir, glm::vec2& intersectionPoint, float& lowestFraction);
+	bool calculateAABBcollision(Object &object1, Object &object2);
 };
 
 #endif
