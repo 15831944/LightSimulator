@@ -6,8 +6,8 @@
 ObjectTemplate::ObjectTemplate()
 	: Position(0, 0, 0), Size(1, 1, 0), Color(1.0f), Rotation(0.0f), Sprite() { }
 
-ObjectTemplate::ObjectTemplate(glm::vec2 pos, glm::vec2 size, Texture2D sprite, glm::vec4 color)
-	: Position(pos, 0.0f), Size(size, 0.0f), Color(color), Rotation(0.0f), Sprite(sprite) {
+ObjectTemplate::ObjectTemplate(glm::vec2 pos, glm::vec2 size, Texture2D sprite, glm::vec4 color, bool fixed)
+	: Position(pos, 0.0f), Size(size, 0.0f), Color(color), Rotation(0.0f), Sprite(sprite), FixedPosition(fixed) {
 }
 
 void ObjectTemplate::moveObject(glm::vec2 newPos) {

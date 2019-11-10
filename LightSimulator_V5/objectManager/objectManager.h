@@ -54,14 +54,16 @@ private:
 	glm::vec2 doRefraction(const glm::vec2 &Incident, const glm::vec2 &Normal, float &n1, float &n2);
 	void checkRefIndex(lightObject* theLight, glm::vec2 theOrigin);
 	float calcAngle(glm::vec2 vec1, glm::vec2 vec2);
+	bool doExperiment();
+	void clearAllObjects();
 	//template <typename type>
 	//bool castRay3D(glm::vec3 &orig, glm::vec3 &dir, unsigned int &tIndex, int dataType, type** hitObject, glm::vec3 &intersectionPt);
 
 public:
 	objectManager(Shader quadShader, Shader rayShader);
 	~objectManager();
-	void addObject(glm::vec2 oPos, glm::vec2 oSize, std::string oTex);
-	void addLight(glm::vec2 lPos, glm::vec2 lSize, std::string lTex);
+	void addObject(glm::vec2 oPos, glm::vec2 oSize, std::string oTex, glm::vec4 color = glm::vec4(1.0f) , bool fix = false);
+	void addLight(glm::vec2 lPos, glm::vec2 lSize, std::string lTex, bool fix = false);
 	void addAngleIndicator(float angle1, float angle2, float n1, float n2, glm::vec2 aPos, glm::vec2 aSize, std::string aTex);
 	void selectObject(glm::vec3 coords, bool mouse1, bool mouse2);
 	void deselectObject();

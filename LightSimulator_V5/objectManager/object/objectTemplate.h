@@ -16,9 +16,10 @@ public:
 	glm::vec3   Position, Size, Color;
 	GLfloat     Rotation;
 	Texture2D   Sprite;
+	bool		FixedPosition;
 	// Constructor(s)
 	ObjectTemplate();
-	ObjectTemplate(glm::vec2 pos, glm::vec2 size, Texture2D sprite, glm::vec4 color = glm::vec4(1.0f));
+	ObjectTemplate(glm::vec2 pos, glm::vec2 size, Texture2D sprite, glm::vec4 color = glm::vec4(1.0f), bool fixed = false);
 	// Draw sprite
 	virtual void Draw(SpriteRenderer &renderer);
 	virtual void moveObject(glm::vec2 newPos);

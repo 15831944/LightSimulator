@@ -7,8 +7,8 @@
 
 constexpr auto PI = 3.14159265358979323846264338327f;
 
-lightObject::lightObject(glm::vec2 pos, glm::vec2 size, Texture2D sprite)
-	: ObjectTemplate(pos, size, sprite) {
+lightObject::lightObject(glm::vec2 pos, glm::vec2 size, Texture2D sprite, bool fixed)
+	: ObjectTemplate(pos, size, sprite, glm::vec4(1.0f), fixed) {
 	//Set default ray colour.
 	rayColour = glm::vec3(1.0f, 1.0f, 1.0f);
 	
@@ -25,6 +25,7 @@ lightObject::lightObject(glm::vec2 pos, glm::vec2 size, Texture2D sprite)
 
 void lightObject::Draw(SpriteRenderer &renderer)
 {
+	rotateToIndicator(); //Call the rotate function here so that the ray direction updates while the indicator is being moved by the user.
 	renderer.DrawSprite(this->Sprite, this->Position, this->Size, this->Rotation, this->Color);
 	renderer.DrawSprite(this->directionIndicator->Sprite, this->directionIndicator->Position, this->directionIndicator->Size, this->directionIndicator->Rotation, this->directionIndicator->Color);
 }
@@ -78,4 +79,11 @@ void lightObject::rotateToIndicator() {
 		this->rotateObject(angle);//calculate normal angle (from 0 to PI).
 	}
 	this->rayDirection = directionVec;//set new direction vector for the light ray.
+}
+
+void lightObject::rotateByAngle(float angle) {
+	float temp = rayDirection.x;
+	rayDirection.x = rayDirection.x * cos(glm::radians(angle)) + rayDirection.y * -sin(glm::radians(angle));
+	rayDirection.y = temp * sin(glm::radians(angle)) + rayDirection.y * cos(glm::radians(angle));
+	this->directionIndicator->Position = glm::vec3(this->rayOrigin + this->rayDirection * glm::vec2(50), 0.0f);
 }

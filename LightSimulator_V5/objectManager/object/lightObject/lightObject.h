@@ -24,7 +24,7 @@ public:
 
 	float currentRefractiveIndex = 1.0f;
 
-	lightObject(glm::vec2 pos, glm::vec2 size, Texture2D sprite);
+	lightObject(glm::vec2 pos, glm::vec2 size, Texture2D sprite, bool fixed = false);
 	void Draw(SpriteRenderer &renderer);
 	void DrawRay(RayRenderer &renderer, glm::vec2 v0, glm::vec2 v1);
 	void moveObject(glm::vec2 newPos);
@@ -32,6 +32,7 @@ public:
 	float calculateAngle(glm::vec2 rayDir, glm::vec2 normal);
 	void rotateToMouse(glm::vec3 coords);
 	void rotateToIndicator();
+	void rotateByAngle(float angle);
 };
 
 #endif

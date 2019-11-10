@@ -11,8 +11,9 @@ enum programState {
 
 class Program {
 private:
-	objectManager* oManager;
+	
 public:
+	objectManager* oManager;
 	programState State;
 	bool Keys[1024];
 	bool mouse[3];

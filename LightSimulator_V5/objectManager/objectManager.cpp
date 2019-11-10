@@ -63,21 +63,39 @@ void objectManager::selectObject(glm::vec3 coords, bool mouse1, bool mouse2) {
 		selState = move;
 	}
 	if (selState == move) {
-		if (selectedObject != nullptr) {
+		if (coords.x > 410.0f) {
+			if (selectedObject != nullptr) {
+				if (selectedDirection == nullptr) {
+					if (selectedLight == nullptr) {
+						//Check to make sure the object hasn't been marked as not movable. If it is, then don't move object.
+						if (!selectedObject->FixedPosition) {
+							this->selectedObject->moveObject(coords);
+						}
+					}
+				}
+			}
 			if (selectedDirection == nullptr) {
-				if (selectedLight == nullptr) {
-					this->selectedObject->moveObject(coords);
+				if (selectedLight != nullptr) {
+					if (!selectedLight->FixedPosition) {
+						this->selectedLight->moveObject(coords);
+					}
+				}
+			}
+
+			if (selectedDirection != nullptr) {
+				if (!selectedDirection->FixedPosition) {
+					this->selectedDirection->moveObject(coords);
 				}
 			}
 		}
-		if (selectedDirection == nullptr) {
-			if (selectedLight != nullptr) {
-				this->selectedLight->moveObject(coords);
-			}
-		}
-		
 		if (selectedDirection != nullptr) {
-			this->selectedDirection->moveObject(coords);
+
+			//To display info about the light object that the indicator belongs to, find out which light it belongs to here:
+			for (unsigned int i = 0; i < lightList.size(); i++) {
+				if (lightList[i]->directionIndicator == selectedDirection) {
+					selectedLight = lightList[i];
+				}
+			}
 		}
 
 		if (!mouse1) {
@@ -88,20 +106,17 @@ void objectManager::selectObject(glm::vec3 coords, bool mouse1, bool mouse2) {
 		for (unsigned int i = 0; i < lightList.size(); i++) {
 			this->lightList[i]->rotateToIndicator();
 		}
-		if (selectedLight != nullptr) {
-			this->selectedLight->rotateToIndicator();
-		}
-		else if (selectedLight == nullptr) {
+		/*if (selectedLight == nullptr) {
 			//deselectObject();
 			selState = edit;
-		}
+		}*/
+		
 		if (mouse1) {
-			//deselectObject();
 			selState = edit;
 		}
 	}
 	if (selState == edit) {
-		if (mouse1) {
+		if (mouse1 && coords.x > 410.0f) {
 			selState = choose;
 		}
 		
@@ -115,12 +130,12 @@ void objectManager::deselectObject() {
 	this->selectedDirection = nullptr;
 }
 
-void objectManager::addObject(glm::vec2 oPos, glm::vec2 oSize, std::string oTex) {
-	this->objList.push_back(new Object(oPos, oSize, ResourceManager::GetTexture(oTex)));
+void objectManager::addObject(glm::vec2 oPos, glm::vec2 oSize, std::string oTex, glm::vec4 color, bool fix) {
+	this->objList.push_back(new Object(oPos, oSize, ResourceManager::GetTexture(oTex), color, fix));
 }
 
-void objectManager::addLight(glm::vec2 lPos, glm::vec2 lSize, std::string lTex) {
-	this->lightList.push_back(new lightObject(lPos, lSize, ResourceManager::GetTexture(lTex)));
+void objectManager::addLight(glm::vec2 lPos, glm::vec2 lSize, std::string lTex, bool fix) {
+	this->lightList.push_back(new lightObject(lPos, lSize, ResourceManager::GetTexture(lTex), fix));
 	this->dirList.push_back(lightList[lightList.size()-1]->directionIndicator);
 }
 
@@ -410,8 +425,51 @@ void objectManager::traceRay(lightObject* currentLight, glm::vec2 &origin, glm::
 	}
 }
 
+bool objectManager::doExperiment() {
+	bool dataEntered = false;
+	switch (gui->activeExperiment) {
+	case 1:	
+		objList.clear();
+		lightList.clear();
+		glm::vec2 positions = glm::vec2(700, 500);
+		
+		for (unsigned int i = 0; i < sizeof(gui->refractiveIndexes)/sizeof(gui->refractiveIndexes[i]); i++) {
+			if (gui->refractiveIndexes[i] != 0.000) {
+				positions.x += 100;
+				addObject(positions, glm::vec2(100, 500), "sblock", glm::vec4(1.0f), true);
+				objList[i]->refractiveIndex = gui->refractiveIndexes[i];
+				dataEntered = true;
+			}
+		}
+
+		if (dataEntered) {
+			addLight(glm::vec2(500, 300), glm::vec2(40, 40), "block", true);
+			lightList[0]->rotateByAngle(gui->incidenceAngle);
+		}
+		
+		gui->activeExperiment = 0;
+		return true;
+		break;
+
+
+	default:
+		return false;
+		break;
+	}
+}
+
+void objectManager::clearAllObjects() {
+	//NOT WORKING
+	objList.clear();
+	lightList.clear();
+}
+
 void objectManager::drawAll() {
 	angList.clear();//Clear any angle indicator objects from the previous frame.
+	bool experimentDone = false;
+	if (doExperiment()) {
+		experimentDone = true;
+	}
 
 	//draw all objects.
 	for (unsigned int i = 0; i < objList.size(); i++) {
@@ -427,13 +485,15 @@ void objectManager::drawAll() {
 	for (unsigned int i = 0; i < angList.size(); i++) {
 		angList[i]->Draw(*Renderer);
 	}
-	//Booleans used for adding to the scene.
+	//Booleans used for adding to/editing the scene.
 	bool addLight = false;
 	bool addObject = false;
+	bool clearSc = false;
 	//Render GUI.
 	gui->prepareNewFrame();
 	//gui->createObjectDetailsWindow(selectedObject, selectedLight, selectedIndicator);
-	gui->createSceneManagerWindow(addObject, addLight, selectedObject, selectedLight, selectedIndicator);
+	gui->createSceneManagerWindow(clearSc, addObject, addLight, selectedObject, selectedLight, selectedIndicator);
+	gui->displayResults(angList);
 	gui->renderNewFrame();
 	//If the user clicks to add an object, then the object will be added and rendered to the scene on the next frame.
 	if (addLight) {
@@ -441,5 +501,8 @@ void objectManager::drawAll() {
 	}
 	else if (addObject) {
 		this->addObject(glm::vec2(800.0f, 200.0f), glm::vec2(100.0f, 100.0f), "sblock");
+	}
+	else if (clearSc) {
+		clearAllObjects();
 	}
 }
