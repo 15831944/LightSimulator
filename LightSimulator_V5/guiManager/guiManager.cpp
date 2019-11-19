@@ -15,7 +15,7 @@ void guiManager::renderNewFrame() {
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
 
-void guiManager::createSceneManagerWindow(bool clearScene, bool &addOb, bool &addlightOb, Object *&ob, lightObject *&lightOb, angleIndicator *&ind) {
+void guiManager::createSceneManagerWindow(bool &clearScene, bool &addOb, bool &addlightOb, Object *&ob, lightObject *&lightOb, angleIndicator *&ind) {
 	ImGui::Begin("Scene Manager");
 	ImGui::SetWindowPos(sceneManagerWindowPos);
 	ImGui::SetWindowSize(sceneManagerWindowSize);
@@ -29,12 +29,14 @@ void guiManager::createSceneManagerWindow(bool clearScene, bool &addOb, bool &ad
 			ImGui::SliderFloat("Size y", &ob->Size.y, 10.0f, 500.0f);
 			ImGui::SliderFloat("Position x", &ob->Position.x, 0.0f, 1200.0f - ob->Size.x);
 			ImGui::SliderFloat("Position y", &ob->Position.y, 0.0f, 1000.0f - ob->Size.y);
+			ImGui::Checkbox("Fixed", &ob->FixedPosition);
 		}
 		else if (lightOb != nullptr) {
 			ImGui::Text("Colour");
 			ImGui::SliderFloat("R", &lightOb->rayColour.r, 0.0f, 1.0f);
 			ImGui::SliderFloat("G", &lightOb->rayColour.g, 0.0f, 1.0f);
 			ImGui::SliderFloat("B", &lightOb->rayColour.b, 0.0f, 1.0f);
+			ImGui::Checkbox("Fixed", &lightOb->FixedPosition);
 		}
 		else if (ind != nullptr) {
 			std::string a1, a2, ri1, ri2;

@@ -400,7 +400,9 @@ void objectManager::traceRay(lightObject* currentLight, glm::vec2 &origin, glm::
 		unsigned int index = 0;
 		Object *hitObject = nullptr;
 		glm::vec2 intersectionPoint;
+		glm::vec2 angleIntersectionPoint;
 		if (castRay(origin, direction, index, &hitObject, intersectionPoint)) {
+			angleIntersectionPoint = intersectionPoint;
 			currentLight->DrawRay(*rRenderer, origin, intersectionPoint);
 			glm::vec2 normal = calculateNormal(intersectionPoint, *hitObject);
 			currentLight->DrawRay(*rRenderer, intersectionPoint - normal * 50.0f, intersectionPoint + normal * 50.0f);
@@ -409,11 +411,31 @@ void objectManager::traceRay(lightObject* currentLight, glm::vec2 &origin, glm::
 			glm::vec2 refractionDirection = glm::normalize(doRefraction(direction, normal, currentLight->currentRefractiveIndex, hitObject->refractiveIndex));
 			
 			glm::vec2 reflectionRayOrigin = (glm::dot(reflectionDirection, normal) < 0) ? intersectionPoint - normal * 0.01f : intersectionPoint + normal * 0.01f;
-			glm::vec2 refractionRayOrigin = (glm::dot(glm::normalize(refractionDirection), normal) < 0) ? intersectionPoint - normal * 0.01f : intersectionPoint + normal * 0.01f;
+			glm::vec2 refractionRayOrigin = (glm::dot(glm::normalize(refractionDirection), normal) < 0) ? intersectionPoint - normal * 0.01f  : intersectionPoint + normal * 0.01f;
+
+			if (glm::dot(glm::normalize(refractionDirection), normal) < 0) {
+				angleIntersectionPoint += normal * 0.01f;
+			}
+			else {
+				angleIntersectionPoint -= normal * 0.01f;
+			}
 
 			//Add angle indicator here
 			//Fix swapping the displayed order of refractive indexes.
-			addAngleIndicator(calcAngle(normal, -direction), calcAngle(normal, -refractionDirection), currentLight->currentRefractiveIndex, hitObject->refractiveIndex, intersectionPoint, glm::vec2(30.0f, 30.0f), "angleIndicator");
+			glm::vec3 checkPoint = glm::vec3(angleIntersectionPoint, 1.0f);
+			glm::vec3 intersection = glm::vec3(0.0f);
+			glm::vec3 direc = glm::vec3(0.0f, 0.0f, -1.0f);
+			float angle1, angle2;
+			unsigned int index = 0;
+			if (castRay3D(checkPoint, direc, index, &this->thing, intersection)) {
+				angle1 = calcAngle(normal, direction);
+				angle2 = calcAngle(normal, refractionDirection);
+			} 
+			else {
+				angle1 = calcAngle(normal, -direction);
+				angle2 = calcAngle(normal, -refractionDirection);
+			}
+			addAngleIndicator(angle1, angle2, currentLight->currentRefractiveIndex, hitObject->refractiveIndex, intersectionPoint, glm::vec2(30.0f, 30.0f), "angleIndicator");
 
 
 			traceRay(currentLight, refractionRayOrigin, refractionDirection, depth + 1);
@@ -426,27 +448,29 @@ void objectManager::traceRay(lightObject* currentLight, glm::vec2 &origin, glm::
 }
 
 bool objectManager::doExperiment() {
-	bool dataEntered = false;
-	switch (gui->activeExperiment) {
+	//This function will return a boolean which will tell whether an experiment was carried out.
+	//Use of a switch statement to check which experiment to do.
+	switch (gui->activeExperiment) {//the gui object contains an int to represent which experiment to do.
 	case 1:	
-		objList.clear();
-		lightList.clear();
+		clearAllObjects();
+		//Set the starting position for automatically added objects.
 		glm::vec2 positions = glm::vec2(700, 500);
-		
+		//Loop through the user entered data from the GUI and add objects accordingly.
 		for (unsigned int i = 0; i < sizeof(gui->refractiveIndexes)/sizeof(gui->refractiveIndexes[i]); i++) {
 			if (gui->refractiveIndexes[i] != 0.000) {
+				//Increment x coordinate so objects are added next to eachother.
 				positions.x += 100;
+				//Add object with the fixed parameter as true to prevent the user from moving them accidentally.
 				addObject(positions, glm::vec2(100, 500), "sblock", glm::vec4(1.0f), true);
+				//Set the refractive indexes for each added object using the data entered in the GUI.
 				objList[i]->refractiveIndex = gui->refractiveIndexes[i];
-				dataEntered = true;
 			}
 		}
-
-		if (dataEntered) {
-			addLight(glm::vec2(500, 300), glm::vec2(40, 40), "block", true);
-			lightList[0]->rotateByAngle(gui->incidenceAngle);
-		}
+		//add a new light object with angle according to the users input. Set the fixed value to true to prevent accidental movement.
+		addLight(glm::vec2(500, 300), glm::vec2(40, 40), "block", true);
+		lightList[0]->rotateByAngle(gui->incidenceAngle);
 		
+		//Now that experiment has been carried out, set the active experiment to 0 (no experiment) to prevent the next render loop repeating the experiment.
 		gui->activeExperiment = 0;
 		return true;
 		break;
@@ -459,7 +483,7 @@ bool objectManager::doExperiment() {
 }
 
 void objectManager::clearAllObjects() {
-	//NOT WORKING
+	//This function will erase all of the objects on the scene.
 	objList.clear();
 	lightList.clear();
 }

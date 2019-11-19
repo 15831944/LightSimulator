@@ -30,7 +30,7 @@ public:
 	guiManager();
 	void prepareNewFrame();
 	void renderNewFrame();
-	void createSceneManagerWindow(bool clearScene, bool &addOb, bool &addlightOb, Object *&ob, lightObject *&lightOb, angleIndicator *&ind);
+	void createSceneManagerWindow(bool &clearScene, bool &addOb, bool &addlightOb, Object *&ob, lightObject *&lightOb, angleIndicator *&ind);
 	void displayResults(std::vector<angleIndicator*> data);
 };
 #endif // !GUIMANAGER_H

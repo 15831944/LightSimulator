@@ -13,7 +13,7 @@
 
 class objectManager {
 private:
-	//group of object pointers that contain all the objects in the scene.
+	//vector of object pointers that contain all the objects in the scene.
 	std::vector<Object*> objList;
 	std::vector<lightObject*> lightList;
 	std::vector<angleIndicator*> angList;
@@ -29,6 +29,8 @@ private:
 	lightObject *selectedLight = nullptr;
 	angleIndicator *selectedIndicator = nullptr;
 	ObjectTemplate* selectedDirection = nullptr;
+
+	Object *thing = nullptr;
 
 	enum selectState {
 		choose,
