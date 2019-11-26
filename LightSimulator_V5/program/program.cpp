@@ -30,7 +30,8 @@ void Program::Init()
 
 	ResourceManager::GetShader("lightRay").Use().SetMatrix4("projection", projection);
 	// Load textures
-	ResourceManager::LoadTexture("block_solid.png", GL_TRUE, "sblock");
+	ResourceManager::LoadTexture("sBlock.png", GL_TRUE, "sblock");
+	ResourceManager::LoadTexture("torch.png", GL_TRUE, "torch");
 	ResourceManager::LoadTexture("block.png", GL_TRUE, "block");
 	ResourceManager::LoadTexture("angleIndicatorIcon.png", GL_TRUE, "angleIndicator");
 	// Set render-specific controls
@@ -42,7 +43,8 @@ void Program::Init()
 	oManager = new objectManager(quadShader, rayShader);
 	//create default objects
 	oManager->addObject(glm::vec2(900, 550), glm::vec2(200, 200), "sblock");
-	oManager->addLight(glm::vec2(500, 570), glm::vec2(40, 40), "block");
+	oManager->addLight(glm::vec2(500, 570), glm::vec2(60, 60), "torch");
+	oManager->addLight(glm::vec2(600, 670), glm::vec2(150, 30), "block");
 }
 
 void Program::Update(GLfloat dt)

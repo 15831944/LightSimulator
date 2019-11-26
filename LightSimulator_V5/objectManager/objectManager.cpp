@@ -405,7 +405,8 @@ void objectManager::traceRay(lightObject* currentLight, glm::vec2 &origin, glm::
 			angleIntersectionPoint = intersectionPoint;
 			currentLight->DrawRay(*rRenderer, origin, intersectionPoint);
 			glm::vec2 normal = calculateNormal(intersectionPoint, *hitObject);
-			currentLight->DrawRay(*rRenderer, intersectionPoint - normal * 50.0f, intersectionPoint + normal * 50.0f);
+			//draw normal
+			//currentLight->DrawRay(*rRenderer, intersectionPoint - normal * 50.0f, intersectionPoint + normal * 50.0f);
 			//Reflection and Refraction
 			glm::vec2 reflectionDirection = glm::normalize(doReflection(direction, normal));
 			glm::vec2 refractionDirection = glm::normalize(doRefraction(direction, normal, currentLight->currentRefractiveIndex, hitObject->refractiveIndex));
@@ -467,7 +468,7 @@ bool objectManager::doExperiment() {
 			}
 		}
 		//add a new light object with angle according to the users input. Set the fixed value to true to prevent accidental movement.
-		addLight(glm::vec2(500, 300), glm::vec2(40, 40), "block", true);
+		addLight(glm::vec2(500, 300), glm::vec2(60, 60), "torch", true);
 		lightList[0]->rotateByAngle(gui->incidenceAngle);
 		
 		//Now that experiment has been carried out, set the active experiment to 0 (no experiment) to prevent the next render loop repeating the experiment.
@@ -502,8 +503,10 @@ void objectManager::drawAll() {
 	//draw all light sources and carry out ray tracing.
 	for (unsigned int i = 0; i < lightList.size(); i++) {
 		lightList[i]->Draw(*Renderer);
-		checkRefIndex(lightList[i], lightList[i]->rayOrigin);
-		traceRay(lightList[i], lightList[i]->rayOrigin, lightList[i]->rayDirection, 0);
+		if (!lightList[i]->turnedOff) {
+			checkRefIndex(lightList[i], lightList[i]->rayOrigin);
+			traceRay(lightList[i], lightList[i]->rayOrigin, lightList[i]->rayDirection, 0);
+		}
 	}
 	//Render the angle indicators. The user can click on these to view infomation about what happened to the ray after it hit the surface.
 	for (unsigned int i = 0; i < angList.size(); i++) {
@@ -521,7 +524,7 @@ void objectManager::drawAll() {
 	gui->renderNewFrame();
 	//If the user clicks to add an object, then the object will be added and rendered to the scene on the next frame.
 	if (addLight) {
-		this->addLight(glm::vec2(500.0f, 200.0f), glm::vec2(40.0f, 40.0f), "block");
+		this->addLight(glm::vec2(500.0f, 200.0f), glm::vec2(60.0f, 60.0f), "torch");
 	}
 	else if (addObject) {
 		this->addObject(glm::vec2(800.0f, 200.0f), glm::vec2(100.0f, 100.0f), "sblock");

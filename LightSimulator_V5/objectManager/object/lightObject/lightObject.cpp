@@ -26,7 +26,8 @@ lightObject::lightObject(glm::vec2 pos, glm::vec2 size, Texture2D sprite, bool f
 void lightObject::Draw(SpriteRenderer &renderer)
 {
 	rotateToIndicator(); //Call the rotate function here so that the ray direction updates while the indicator is being moved by the user.
-	renderer.DrawSprite(this->Sprite, this->Position, this->Size, this->Rotation, this->Color);
+	renderer.DrawSprite(this->Sprite, this->Position, this->Size, this->Rotation, this->Color); //draw the light
+	//draw the indicator
 	renderer.DrawSprite(this->directionIndicator->Sprite, this->directionIndicator->Position, this->directionIndicator->Size, this->directionIndicator->Rotation, this->directionIndicator->Color);
 }
 

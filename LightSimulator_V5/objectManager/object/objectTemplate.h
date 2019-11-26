@@ -13,11 +13,12 @@ class ObjectTemplate
 {
 public:
 	// Object state
-	glm::vec3   Position, Size, Color;
+	glm::vec3   Position, Size;
+	glm::vec4	Color;
 	GLfloat     Rotation;
 	Texture2D   Sprite;
 	bool		FixedPosition;
-	// Constructor(s)
+	// Constructors
 	ObjectTemplate();
 	ObjectTemplate(glm::vec2 pos, glm::vec2 size, Texture2D sprite, glm::vec4 color = glm::vec4(1.0f), bool fixed = false);
 	// Draw sprite

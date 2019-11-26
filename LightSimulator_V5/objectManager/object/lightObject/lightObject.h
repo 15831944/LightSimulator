@@ -19,6 +19,8 @@ public:
 	glm::vec2 rayDirection; //unit vector
 	glm::vec2 rayOrigin, rayEnd; //(x1, y1)
 	glm::vec3 rayColour;
+	int noOfRays = 1;
+	bool turnedOff = false;
 
 	ObjectTemplate *directionIndicator = nullptr;
 

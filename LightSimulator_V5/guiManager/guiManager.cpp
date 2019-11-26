@@ -34,9 +34,15 @@ void guiManager::createSceneManagerWindow(bool &clearScene, bool &addOb, bool &a
 		else if (lightOb != nullptr) {
 			ImGui::Text("Colour");
 			ImGui::SliderFloat("R", &lightOb->rayColour.r, 0.0f, 1.0f);
+			ImGui::Text("");
 			ImGui::SliderFloat("G", &lightOb->rayColour.g, 0.0f, 1.0f);
+			ImGui::Text("");
 			ImGui::SliderFloat("B", &lightOb->rayColour.b, 0.0f, 1.0f);
+			ImGui::Text("");
+			ImGui::Text("");
 			ImGui::Checkbox("Fixed", &lightOb->FixedPosition);
+			ImGui::Text("");
+			ImGui::Checkbox("Turn Off", &lightOb->turnedOff);
 		}
 		else if (ind != nullptr) {
 			std::string a1, a2, ri1, ri2;
@@ -47,8 +53,11 @@ void guiManager::createSceneManagerWindow(bool &clearScene, bool &addOb, bool &a
 			ri2 = "Refractive index 2: " + (std::to_string(*&ind->n2));
 
 			ImGui::Text(a1.c_str());
+			ImGui::Text("");
 			ImGui::Text(a2.c_str());
+			ImGui::Text("");
 			ImGui::Text(ri1.c_str());
+			ImGui::Text("");
 			ImGui::Text(ri2.c_str());
 		}
 		else {
@@ -88,8 +97,11 @@ void guiManager::createSceneManagerWindow(bool &clearScene, bool &addOb, bool &a
 			ImGui::InputFloat("Object 6:", &refractiveIndexes[5], 0.01f, 0.01f, 3);
 
 			ImGui::Text("");
+			ImGui::Text("");
 
 			ImGui::InputFloat("Incidence Angle:", &incidenceAngle, 0.5f, 0.1f, 1);
+
+			ImGui::Text("");
 
 			if (ImGui::Button("Start")) {
 				activeExperiment = 1;
@@ -102,7 +114,7 @@ void guiManager::createSceneManagerWindow(bool &clearScene, bool &addOb, bool &a
 	ImGui::End();
 }
 
-void guiManager::displayResults(std::vector<angleIndicator*> data) {
+/*void guiManager::displayResults(std::vector<angleIndicator*> data) {
 	std::string text;
 	ImGui::SetNextWindowBgAlpha(0.4f);
 	for (unsigned int i = 0; i < data.size(); i++) {
@@ -114,6 +126,20 @@ void guiManager::displayResults(std::vector<angleIndicator*> data) {
 		ImGui::Text(text.c_str());
 		text = "Angle 2: " + std::to_string(data[i]->rAngle);
 		ImGui::Text(text.c_str());
+		ImGui::End();
+	}
+}*/
+
+void guiManager::displayResults(std::vector<angleIndicator*> data) {
+	std::string text;
+	for (unsigned int i = 0; i < data.size(); i++) {
+		ImGui::Begin("Scene Manager");
+		ImGui::Text("");
+		text = "Angle 1: " + std::to_string(data[i]->iAngle);
+		ImGui::Text(text.c_str());
+		text = "Angle 2: " + std::to_string(data[i]->rAngle);
+		ImGui::Text(text.c_str());
+		ImGui::Text("");
 		ImGui::End();
 	}
 }
