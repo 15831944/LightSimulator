@@ -46,8 +46,8 @@ private:
 
 	void fresnel(const glm::vec2 direction, const glm::vec2 normal, const float &rI, float &kr);
 	glm::vec2 calculateNormal(glm::vec2 intersectionPoint, Object aabb);
-	void traceRay(lightObject* currentLight, glm::vec2 &origin, glm::vec2 &direction, unsigned int depth);
-	bool castRay(glm::vec2 &orig, glm::vec2 &dir, unsigned int &tIndex, Object** hitObject, glm::vec2 &intersectionPt);
+	void castRay(lightObject* currentLight, glm::vec2 &origin, glm::vec2 &direction, float alpha, unsigned int depth);
+	bool traceRay(glm::vec2 &orig, glm::vec2 &dir, unsigned int &tIndex, Object** hitObject, glm::vec2 &intersectionPt);
 	bool castRay3D(glm::vec3 &orig, glm::vec3 &dir, unsigned int &tIndex, Object** hitObject, glm::vec3 &intersectionPt);
 	bool castRay3D(glm::vec3 &orig, glm::vec3 &dir, unsigned int &tIndex, lightObject** hitObject, glm::vec3 &intersectionPt);
 	bool castRay3D(glm::vec3 &orig, glm::vec3 &dir, unsigned int &tIndex, ObjectTemplate** hitObject, glm::vec3 &intersectionPt);

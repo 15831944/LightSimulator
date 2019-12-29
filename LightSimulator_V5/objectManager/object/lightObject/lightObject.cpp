@@ -31,8 +31,22 @@ void lightObject::Draw(SpriteRenderer &renderer)
 	renderer.DrawSprite(this->directionIndicator->Sprite, this->directionIndicator->Position, this->directionIndicator->Size, this->directionIndicator->Rotation, this->directionIndicator->Color);
 }
 
-void lightObject::DrawRay(RayRenderer &renderer, glm::vec2 v0, glm::vec2 v1) {
-	renderer.Draw(v0, v1, this->rayColour);
+void lightObject::DrawRay(RayRenderer &renderer, glm::vec2 v0, glm::vec2 v1, float alphaValue) {
+	renderer.Draw(v0, v1, this->rayColour, alphaValue);
+}
+
+void lightObject::createOrigins() {
+	glm::vec2 topSide = glm::vec2(Position.x + (Size.x / 1), Position.y);
+	glm::vec2 lowSide = glm::vec2(Position.x + (Size.x / 1), Position.y + Size.y);
+	
+	glm::vec2 ThisDirection = glm::normalize(lowSide - topSide);
+
+	float length = sqrt((topSide.x - lowSide.x) * (topSide.x - lowSide.x) + (topSide.y - lowSide.y) * (topSide.y - lowSide.y));
+	float rayRatio = length / (noOfRays + 1);
+
+	for (int i = 1; i <= noOfRays; i++) {
+		rayOrigins.push_back(topSide + (ThisDirection * (i * rayRatio)));
+	}
 }
 
 void lightObject::moveObject(glm::vec2 newPos) {

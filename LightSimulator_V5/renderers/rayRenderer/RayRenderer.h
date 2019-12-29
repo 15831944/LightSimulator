@@ -16,7 +16,7 @@ public:
 	// Destructor
 	~RayRenderer();
 
-	void Draw(glm::vec2 origin, glm::vec2 end, glm::vec3 colour);
+	void Draw(glm::vec2 origin, glm::vec2 end, glm::vec3 colour, float transparency);
 private:
 	Shader rayShader;
 	GLuint rayVAO, rayVBO;

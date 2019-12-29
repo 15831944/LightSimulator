@@ -30,7 +30,7 @@ void RayRenderer::initRenderData() {
 }
 
 
-void RayRenderer::Draw(glm::vec2 origin, glm::vec2 end, glm::vec3 colour) {
+void RayRenderer::Draw(glm::vec2 origin, glm::vec2 end, glm::vec3 colour, float transparency) {
 	GLfloat vertices[] = {
 		origin.x, origin.y,
 		end.x, end.y
@@ -40,6 +40,7 @@ void RayRenderer::Draw(glm::vec2 origin, glm::vec2 end, glm::vec3 colour) {
 
 	this->rayShader.Use();
 	this->rayShader.SetVector3f("colour", colour);
+	this->rayShader.SetFloat("alpha", transparency);
 	glBindVertexArray(this->rayVAO);
 	glDrawArrays(GL_LINES, 0, 2);
 }

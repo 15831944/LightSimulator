@@ -9,6 +9,7 @@ Object::Object()
 Object::Object(glm::vec2 pos, glm::vec2 size, Texture2D sprite, glm::vec4 color, bool fixed)
 	: ObjectTemplate(pos, size, sprite, color, fixed) {
 	this->refractiveIndex = 2.417f;//diamond
+	this->material = opaque;
 }
 
 

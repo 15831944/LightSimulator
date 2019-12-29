@@ -8,6 +8,10 @@ class Object : public ObjectTemplate
 {
 public:
 	float refractiveIndex;
+	enum materialType {
+		opaque,
+		mirror
+	}material;
 	// Constructor(s)
 	Object();
 	Object(glm::vec2 pos, glm::vec2 size, Texture2D sprite, glm::vec4 color = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), bool fixed = false);

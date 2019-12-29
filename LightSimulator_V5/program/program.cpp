@@ -44,7 +44,7 @@ void Program::Init()
 	//create default objects
 	oManager->addObject(glm::vec2(900, 550), glm::vec2(200, 200), "sblock");
 	oManager->addLight(glm::vec2(500, 570), glm::vec2(60, 60), "torch");
-	oManager->addLight(glm::vec2(600, 670), glm::vec2(150, 30), "block");
+	//oManager->addLight(glm::vec2(600, 670), glm::vec2(150, 30), "block");
 }
 
 void Program::Update(GLfloat dt)

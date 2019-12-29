@@ -164,6 +164,7 @@ glm::vec2 objectManager::doRefraction(const glm::vec2 &Incident, const glm::vec2
 	return sinT2 < 0 ? doReflection(Incident, Normal) : n * Incident + (n * cosI - sqrtf(sinT2)) * norm;
 }
 
+//Used to calculate reflectance of reflected light.
 void objectManager::fresnel(const glm::vec2 direction, const glm::vec2 normal, const float &rI, float &kr) {
 	float cosi = clamp(-1, 1, glm::dot(direction, normal));
 	float n1 = 1, n2 = rI; //ni = incident refractive index, nt = transmission frfractive index.
@@ -172,7 +173,7 @@ void objectManager::fresnel(const glm::vec2 direction, const glm::vec2 normal, c
 		std::swap(n1, n2);
 	}
 	
-	//calculate sint using snell's law
+	//calculate sin of transmitted light using snell's law
 	float sint = n1 / n2 * sqrtf(std::max(0.0f, 1 - cosi * cosi));
 
 	//total internal reflection
@@ -181,7 +182,7 @@ void objectManager::fresnel(const glm::vec2 direction, const glm::vec2 normal, c
 	}
 	else {
 		float cost = sqrtf(std::max(0.0f, 1 - sint * sint));
-		cosi = fabsf(cosi); //fabsf = floating point absolute value that takes in a float.
+		cosi = fabsf(cosi); //fabsf = absolute value of a float.
 		
 		//Reflectance for s-polarized light.
 		float Rs = ((n1 * cosi) - (n1 * cost)) / ((n2 * cosi) + (n1 * cost));
@@ -354,7 +355,7 @@ bool objectManager::castRay3D(glm::vec3 &orig, glm::vec3 &dir, unsigned int &tIn
 	return false;
 }
 
-bool objectManager::castRay(glm::vec2 &orig, glm::vec2 &dir, unsigned int &tIndex, Object** hitObject, glm::vec2 &intersectionPt) {
+bool objectManager::traceRay(glm::vec2 &orig, glm::vec2 &dir, unsigned int &tIndex, Object** hitObject, glm::vec2 &intersectionPt) {
 	glm::vec2 testIntersection;
 	float lowestFraction = 2000.0f;
 	float testLowestFraction;
@@ -390,60 +391,90 @@ float objectManager::calcAngle(glm::vec2 vec1, glm::vec2 vec2) {
 	return (std::acos(glm::dot(vec1, vec2)) * 180/3.141592654); //No need to divide by magnitude since both vec1 and vec2 are unit vectors.
 }
 
-void objectManager::traceRay(lightObject* currentLight, glm::vec2 &origin, glm::vec2 &direction, unsigned int depth) {	
+void objectManager::castRay(lightObject* currentLight, glm::vec2 &origin, glm::vec2 &direction, float alpha, unsigned int depth) {	
 	
-	if (depth > 40) {
+	if (depth > 20 || alpha < 0.01f) {
 		checkRefIndex(currentLight, origin);
-		currentLight->DrawRay(*rRenderer, origin, origin + direction * 2000.0f);
+		currentLight->DrawRay(*rRenderer, origin, origin + direction * 2000.0f, alpha);
 	}
 	else {
 		unsigned int index = 0;
 		Object *hitObject = nullptr;
-		glm::vec2 intersectionPoint;
-		glm::vec2 angleIntersectionPoint;
-		if (castRay(origin, direction, index, &hitObject, intersectionPoint)) {
+		glm::vec2 intersectionPoint, angleIntersectionPoint, reflectionDirection, refractionDirection, reflectionRayOrigin, refractionRayOrigin;
+		glm::vec3 checkPoint = glm::vec3(angleIntersectionPoint, 1.0f), intersection = glm::vec3(0.0f), direc = glm::vec3(0.0f, 0.0f, -1.0f);
+		float angle1, angle2, reflectance;
+
+		if (traceRay(origin, direction, index, &hitObject, intersectionPoint)) {
 			angleIntersectionPoint = intersectionPoint;
-			currentLight->DrawRay(*rRenderer, origin, intersectionPoint);
+			currentLight->DrawRay(*rRenderer, origin, intersectionPoint, alpha);
 			glm::vec2 normal = calculateNormal(intersectionPoint, *hitObject);
 			//draw normal
 			//currentLight->DrawRay(*rRenderer, intersectionPoint - normal * 50.0f, intersectionPoint + normal * 50.0f);
 			//Reflection and Refraction
-			glm::vec2 reflectionDirection = glm::normalize(doReflection(direction, normal));
-			glm::vec2 refractionDirection = glm::normalize(doRefraction(direction, normal, currentLight->currentRefractiveIndex, hitObject->refractiveIndex));
+			switch (hitObject->material) {
+			case Object::opaque:
+				reflectionDirection = glm::normalize(doReflection(direction, normal));
+				refractionDirection = glm::normalize(doRefraction(direction, normal, currentLight->currentRefractiveIndex, hitObject->refractiveIndex));
+
+				reflectionRayOrigin = (glm::dot(reflectionDirection, normal) < 0) ? intersectionPoint - normal * 0.01f : intersectionPoint + normal * 0.01f;
+				refractionRayOrigin = (glm::dot(glm::normalize(refractionDirection), normal) < 0) ? intersectionPoint - normal * 0.01f : intersectionPoint + normal * 0.01f;
+
+				if (glm::dot(glm::normalize(refractionDirection), normal) < 0) {
+					angleIntersectionPoint += normal * 0.01f;
+				}
+				else {
+					angleIntersectionPoint -= normal * 0.01f;
+				}
+
+				//Add angle indicator here
+				//Fix swapping the displayed order of refractive indexes.
+				if (castRay3D(checkPoint, direc, index, &this->thing, intersection)) {
+					angle1 = calcAngle(normal, direction);
+					angle2 = calcAngle(normal, refractionDirection);
+				}
+				else {
+					angle1 = calcAngle(normal, -direction);
+					angle2 = calcAngle(normal, -refractionDirection);
+				}
+				if (currentLight->noOfRays == 1) {
+					addAngleIndicator(angle1, angle2, currentLight->currentRefractiveIndex, hitObject->refractiveIndex, intersectionPoint, glm::vec2(30.0f, 30.0f), "angleIndicator");
+				}
+
+				fresnel(direction, normal, hitObject->refractiveIndex, reflectance);
+
+				//ISSUE: WHEN ANGLE GETS REALLY SMALL, TIR RAYS SEEM TO INCREASE ALPHA VALUE.
+				castRay(currentLight, refractionRayOrigin, refractionDirection, alpha - reflectance, depth + 1);
+				castRay(currentLight, reflectionRayOrigin, reflectionDirection, alpha - (1 - reflectance), depth + 1);
+				break;
+
+			case Object::mirror:
+				reflectionDirection = glm::normalize(doReflection(direction, normal));
+				refractionDirection = glm::normalize(doRefraction(direction, normal, currentLight->currentRefractiveIndex, hitObject->refractiveIndex));
+
+				//Add angle indicator here
+				//Fix swapping the displayed order of refractive indexes.
+				
+				
+				if (castRay3D(checkPoint, direc, index, &this->thing, intersection)) {
+					angle1 = calcAngle(normal, direction);
+					angle2 = calcAngle(normal, refractionDirection);
+				}
+				else {
+					angle1 = calcAngle(normal, -direction);
+					angle2 = calcAngle(normal, -refractionDirection);
+				}
+				if (currentLight->noOfRays == 1) {
+					addAngleIndicator(angle1, angle2, currentLight->currentRefractiveIndex, hitObject->refractiveIndex, intersectionPoint, glm::vec2(30.0f, 30.0f), "angleIndicator");
+				}
+				fresnel(direction, normal, hitObject->refractiveIndex, reflectance);
+
+				castRay(currentLight, reflectionRayOrigin, reflectionDirection, alpha - (1- reflectance), depth + 1);
+				break;
+			}
 			
-			glm::vec2 reflectionRayOrigin = (glm::dot(reflectionDirection, normal) < 0) ? intersectionPoint - normal * 0.01f : intersectionPoint + normal * 0.01f;
-			glm::vec2 refractionRayOrigin = (glm::dot(glm::normalize(refractionDirection), normal) < 0) ? intersectionPoint - normal * 0.01f  : intersectionPoint + normal * 0.01f;
-
-			if (glm::dot(glm::normalize(refractionDirection), normal) < 0) {
-				angleIntersectionPoint += normal * 0.01f;
-			}
-			else {
-				angleIntersectionPoint -= normal * 0.01f;
-			}
-
-			//Add angle indicator here
-			//Fix swapping the displayed order of refractive indexes.
-			glm::vec3 checkPoint = glm::vec3(angleIntersectionPoint, 1.0f);
-			glm::vec3 intersection = glm::vec3(0.0f);
-			glm::vec3 direc = glm::vec3(0.0f, 0.0f, -1.0f);
-			float angle1, angle2;
-			unsigned int index = 0;
-			if (castRay3D(checkPoint, direc, index, &this->thing, intersection)) {
-				angle1 = calcAngle(normal, direction);
-				angle2 = calcAngle(normal, refractionDirection);
-			} 
-			else {
-				angle1 = calcAngle(normal, -direction);
-				angle2 = calcAngle(normal, -refractionDirection);
-			}
-			addAngleIndicator(angle1, angle2, currentLight->currentRefractiveIndex, hitObject->refractiveIndex, intersectionPoint, glm::vec2(30.0f, 30.0f), "angleIndicator");
-
-
-			traceRay(currentLight, refractionRayOrigin, refractionDirection, depth + 1);
-			//traceRay(currentLight, reflectionRayOrigin, reflectionDirection, depth + 1);
 		}
 		else {
-			currentLight->DrawRay(*rRenderer, origin, origin + direction * 2000.0f);
+			currentLight->DrawRay(*rRenderer, origin, origin + direction * 2000.0f, alpha);
 		}
 	}
 }
@@ -460,7 +491,7 @@ bool objectManager::doExperiment() {
 		for (unsigned int i = 0; i < sizeof(gui->refractiveIndexes)/sizeof(gui->refractiveIndexes[i]); i++) {
 			if (gui->refractiveIndexes[i] != 0.000) {
 				//Increment x coordinate so objects are added next to eachother.
-				positions.x += 100;
+				positions.x += 100 + gui->objectGap;
 				//Add object with the fixed parameter as true to prevent the user from moving them accidentally.
 				addObject(positions, glm::vec2(100, 500), "sblock", glm::vec4(1.0f), true);
 				//Set the refractive indexes for each added object using the data entered in the GUI.
@@ -505,7 +536,16 @@ void objectManager::drawAll() {
 		lightList[i]->Draw(*Renderer);
 		if (!lightList[i]->turnedOff) {
 			checkRefIndex(lightList[i], lightList[i]->rayOrigin);
-			traceRay(lightList[i], lightList[i]->rayOrigin, lightList[i]->rayDirection, 0);
+			if (lightList[i]->noOfRays == 1) {
+				castRay(lightList[i], lightList[i]->rayOrigin, lightList[i]->rayDirection, 1.0f, 0);
+			}
+			else {
+				lightList[i]->createOrigins();
+				for (int j = 0; j < lightList[i]->noOfRays; j++) {
+					castRay(lightList[i], lightList[i]->rayOrigins[j], lightList[i]->rayDirection, 1.0f, 0);
+				}
+				lightList[i]->rayOrigins.clear();
+			}
 		}
 	}
 	//Render the angle indicators. The user can click on these to view infomation about what happened to the ray after it hit the surface.
@@ -519,8 +559,8 @@ void objectManager::drawAll() {
 	//Render GUI.
 	gui->prepareNewFrame();
 	//gui->createObjectDetailsWindow(selectedObject, selectedLight, selectedIndicator);
-	gui->createSceneManagerWindow(clearSc, addObject, addLight, selectedObject, selectedLight, selectedIndicator);
-	gui->displayResults(angList);
+	gui->createSceneManagerWindow(clearSc, addObject, addLight, selectedObject, selectedLight, selectedIndicator, angList);
+	gui->displayNumbers(angList);
 	gui->renderNewFrame();
 	//If the user clicks to add an object, then the object will be added and rendered to the scene on the next frame.
 	if (addLight) {
