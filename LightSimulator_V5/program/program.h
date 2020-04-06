@@ -6,12 +6,12 @@
 
 enum programState {
 	PROGRAM_ACTIVE,
-	PROGRAM_MENU
+	PROGRAM_LOGIN,
+	PROGRAM_CREATEACCOUNT
 };
 
 class Program {
-private:
-	
+
 public:
 	objectManager* oManager;
 	programState State;

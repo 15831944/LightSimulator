@@ -51,6 +51,7 @@ void Shader::SetFloat(const GLchar *name, GLfloat value, GLboolean useShader)
 {
 	if (useShader)
 		this->Use();
+	//Set uniform data inside the shader
 	glUniform1f(glGetUniformLocation(this->ID, name), value);
 }
 void Shader::SetInteger(const GLchar *name, GLint value, GLboolean useShader)
@@ -105,11 +106,14 @@ void Shader::SetMatrix4(const GLchar *name, const glm::mat4 &matrix, GLboolean u
 
 void Shader::checkCompileErrors(GLuint object, std::string type)
 {
+	//Create veriables to store result of error check
 	GLint success;
 	GLchar infoLog[1024];
 	if (type != "PROGRAM")
 	{
+		//Read the result of the compilation to see if it was successful
 		glGetShaderiv(object, GL_COMPILE_STATUS, &success);
+		//If the compilation was not successful
 		if (!success)
 		{
 			glGetShaderInfoLog(object, 1024, NULL, infoLog);
@@ -118,7 +122,7 @@ void Shader::checkCompileErrors(GLuint object, std::string type)
 				<< std::endl;
 		}
 	}
-	else
+	else//If the compilation was successful
 	{
 		glGetProgramiv(object, GL_LINK_STATUS, &success);
 		if (!success)

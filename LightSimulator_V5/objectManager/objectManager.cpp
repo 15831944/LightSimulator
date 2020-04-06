@@ -15,6 +15,7 @@ objectManager::objectManager(Shader quadShader, Shader rayShader) {
 	rRenderer = new RayRenderer(rayShader);
 	gui = new guiManager();
 	selState = choose;
+	//dbMan = *new DatabaseManager();
 }
 
 objectManager::~objectManager() {
@@ -25,118 +26,78 @@ objectManager::~objectManager() {
 
 void objectManager::selectObject(glm::vec3 coords, bool mouse1, bool mouse2) {
 	unsigned int index = 0;
-	glm::vec3 intersectionPoint;
+	glm::vec3 intersectionPoint = glm::vec3(0.0f);
 	glm::vec3 direct = glm::vec3(0.0f, 0.0f, -1.0f);
-	if (mouse1 && selState == choose) {
-		deselectObject();
-		if (selectedDirection == nullptr) {
-			for (unsigned int i = 0; i < dirList.size(); i++) {
-				if (castRay3D(coords, direct, index, &this->selectedDirection, intersectionPoint)) {
-					break;
-				}
+	if (mouse2) {//Right mouse button
+		//use ray casting along the Z axis from the cursor's position to see if the ray intersects 
+		//with anything:
+		if (castRay3D(coords, direct, index, this->selectedObject, intersectionPoint)) {
+			deleteTheObject(selectedObject);
+		}
+	}
+	if (mouse1 && selState == choose) {//Left mouse button is clicked and the state is set to choosing objects.
+		deselectObject();//clear any currently selected objects.
+		if (!isSelected) {
+			if (castRay3D(coords, direct, index, this->selectedObject, intersectionPoint)) {//Use Z axis ray cast.
+				//Allows object to be moved by mouse from anywhere, not just the origin of the object.
+				positionOffset = intersectionPoint - this->selectedObject->Position;
+				isSelected = true;
 			}
 		}
-
-		if (selectedIndicator == nullptr) {
-			for (unsigned int i = 0; i < angList.size(); i++) {
-				if (castRay3D(coords, direct, index, &this->selectedIndicator, intersectionPoint)) {
-					break;
-				}
-			}
-		}
-
-		if (selectedLight == nullptr) {
-			for (unsigned int i = 0; i < lightList.size(); i++) {
-				if (castRay3D(coords, direct, index, &this->selectedLight, intersectionPoint)) {
-					break;
-				}
-			}
-		}
-
-		if (selectedObject == nullptr && selectedLight == nullptr && selectedIndicator == nullptr) {
-			for (unsigned int i = 0; i < objList.size(); i++) {
-				if (castRay3D(coords, direct, index, &this->selectedObject, intersectionPoint)) {
-					break;
-				}
-			}
-		}
-		selState = move;
+		selState = move;//Change state to allow object to be moved by the mouse.
 	}
 	if (selState == move) {
-		if (coords.x > 410.0f) {
-			if (selectedObject != nullptr) {
-				if (selectedDirection == nullptr) {
-					if (selectedLight == nullptr) {
-						//Check to make sure the object hasn't been marked as not movable. If it is, then don't move object.
-						if (!selectedObject->FixedPosition) {
-							this->selectedObject->moveObject(coords);
-						}
-					}
-				}
-			}
-			if (selectedDirection == nullptr) {
-				if (selectedLight != nullptr) {
-					if (!selectedLight->FixedPosition) {
-						this->selectedLight->moveObject(coords);
-					}
+		if (coords.x > 410.0f) {//Make sure that the object can't be moved behind the GUI.
+			if (isSelected) {
+				//Check to make sure the object hasn't been marked as not movable. If it is, then don't move object.
+				if (!selectedObject->FixedPosition) {
+					this->selectedObject->moveObject(coords - positionOffset);
 				}
 			}
 
-			if (selectedDirection != nullptr) {
-				if (!selectedDirection->FixedPosition) {
-					this->selectedDirection->moveObject(coords);
-				}
-			}
-		}
-		if (selectedDirection != nullptr) {
-
-			//To display info about the light object that the indicator belongs to, find out which light it belongs to here:
-			for (unsigned int i = 0; i < lightList.size(); i++) {
-				if (lightList[i]->directionIndicator == selectedDirection) {
-					selectedLight = lightList[i];
-				}
-			}
 		}
 
 		if (!mouse1) {
-			selState = rotate;
-		}
-	}
-	if (selState == rotate) {
-		for (unsigned int i = 0; i < lightList.size(); i++) {
-			this->lightList[i]->rotateToIndicator();
-		}
-		/*if (selectedLight == nullptr) {
-			//deselectObject();
-			selState = edit;
-		}*/
-		
-		if (mouse1) {
 			selState = edit;
 		}
 	}
 	if (selState == edit) {
 		if (mouse1 && coords.x > 410.0f) {
-			selState = choose;
+			selState = choose;//when the user clicks the mouse again, attempt to select another object.
 		}
 		
 	}
 }
 
+
 void objectManager::deselectObject() {
-	this->selectedObject = nullptr;
-	this->selectedLight = nullptr;
-	this->selectedIndicator = nullptr;
-	this->selectedDirection = nullptr;
+	isSelected = false;
 }
 
 void objectManager::addObject(glm::vec2 oPos, glm::vec2 oSize, std::string oTex, glm::vec4 color, bool fix) {
+	//add a new object to the end of the objList array.
 	this->objList.push_back(new Object(oPos, oSize, ResourceManager::GetTexture(oTex), color, fix));
+	//read refractive index from the guiManager's objData struct.
+	objList.back()->refractiveIndex = gui->objData.refIndex;
+	if (gui->objData.isMirror) {//if it's a mirror
+		objList.back()->material = Object::mirror;//Set the material
+		objList.back()->Sprite = ResourceManager::GetTexture("mirror");//Use the appropriate texture.
+	}
+	else {
+		objList.back()->material = Object::opaque;//Otherwise, set the material to opaque.
+	}
+	
 }
 
 void objectManager::addLight(glm::vec2 lPos, glm::vec2 lSize, std::string lTex, bool fix) {
+	//add new light object to the end of the lightList array.
 	this->lightList.push_back(new lightObject(lPos, lSize, ResourceManager::GetTexture(lTex), fix));
+	//add the direction indicator to the dirList.
 	this->dirList.push_back(lightList[lightList.size()-1]->directionIndicator);
+	//Set parameters from the guiManager.
+	lightList.back()->rayColour = gui->lightData.colour;
+	lightList.back()->noOfRays = gui->lightData.noRays;
+	lightList.back()->turnedOff = gui->lightData.turnOff;
 }
 
 void objectManager::addAngleIndicator(float angle1, float angle2, float n1, float n2, glm::vec2 aPos, glm::vec2 aSize, std::string aTex) {
@@ -192,7 +153,6 @@ void objectManager::fresnel(const glm::vec2 direction, const glm::vec2 normal, c
 		
 		kr = (Rs * Rs + Rp * Rp) / 2; //amount of reflected light (in range 0-1).
 	}
-
 }
 
 glm::vec2 objectManager::calculateNormal(glm::vec2 intersectionPoint, Object aabb) {
@@ -219,135 +179,48 @@ glm::vec2 objectManager::calculateNormal(glm::vec2 intersectionPoint, Object aab
 	}
 }
 
-/*
-template <typename type>
-bool objectManager::castRay3D(glm::vec3 &orig, glm::vec3 &dir, unsigned int &tIndex, int dataType, type** hitObject, glm::vec3 &intersectionPt) {
-	glm::vec3 testIntersection;
-	float lowestFraction = 1;
-	float testLowestFraction;
-
-	switch (dataType) {
-	case 0: 
-		for (unsigned int i = 0; i < dirList.size(); i++) {
-			if (dirList[i]->CalculateRayCollision3D(orig, dir, testIntersection, testLowestFraction) && testLowestFraction < lowestFraction) {
-				*hitObject = angList[i];
-				intersectionPt = testIntersection;
-				lowestFraction = testLowestFraction;
-				tIndex = i;
-			}
-		}
-		break;
-
-	case 1: 
-		for (unsigned int i = 0; i < objList.size(); i++) {
-			if (objList[i]->CalculateRayCollision3D(orig, dir, testIntersection, testLowestFraction) && testLowestFraction < lowestFraction) {
-				*hitObject = objList[i];
-				intersectionPt = testIntersection;
-				lowestFraction = testLowestFraction;
-				tIndex = i;
-			}
-		}
-		break;
-
-	case 2: 
-		for (unsigned int i = 0; i < lightList.size(); i++) {
-			if (lightList[i]->CalculateRayCollision3D(orig, dir, testIntersection, testLowestFraction) && testLowestFraction < lowestFraction) {
-				*hitObject = lightList[i];
-				intersectionPt = testIntersection;
-				lowestFraction = testLowestFraction;
-				tIndex = i;
-			}
-		}
-		break;
-
-	case 3: 
-		for (unsigned int i = 0; i < angList.size(); i++) {
-			if (angList[i]->CalculateRayCollision3D(orig, dir, testIntersection, testLowestFraction) && testLowestFraction < lowestFraction) {
-				*hitObject = angList[i];
-				intersectionPt = testIntersection;
-				lowestFraction = testLowestFraction;
-				tIndex = i;
-			}
-		}
-		break;
-	}
-
-	if (lowestFraction < 1) {
-		return true;
-	}
-	return false;
-}*/
-
-bool objectManager::castRay3D(glm::vec3 &orig, glm::vec3 &dir, unsigned int &tIndex, angleIndicator** hitObject, glm::vec3 &intersectionPt) {
-	glm::vec3 testIntersection;
-	float lowestFraction = 1;
-	float testLowestFraction;
-
-	for (unsigned int i = 0; i < angList.size(); i++) {
-		if (angList[i]->CalculateRayCollision3D(orig, dir, testIntersection, testLowestFraction) && testLowestFraction < lowestFraction) {
-			*hitObject = angList[i];
-			intersectionPt = testIntersection;
-			lowestFraction = testLowestFraction;
-			tIndex = i;
-		}
-	}
-
-	if (lowestFraction < 1) {
-		return true;
-	}
-	return false;
-}
-
-bool objectManager::castRay3D(glm::vec3 &orig, glm::vec3 &dir, unsigned int &tIndex, ObjectTemplate** hitObject, glm::vec3 &intersectionPt) {
+bool objectManager::castRay3D(glm::vec3 &orig, glm::vec3 &dir, unsigned int &tIndex, ObjectTemplate*& hitObject, glm::vec3 &intersectionPt) {
 	glm::vec3 testIntersection;
 	float lowestFraction = 1;
 	float testLowestFraction;
 
 	for (unsigned int i = 0; i < dirList.size(); i++) {
 		if (dirList[i]->CalculateRayCollision3D(orig, dir, testIntersection, testLowestFraction) && testLowestFraction < lowestFraction) {
-			*hitObject = dirList[i];
+			hitObject = dirList[i];
 			intersectionPt = testIntersection;
 			lowestFraction = testLowestFraction;
 			tIndex = i;
 		}
 	}
 
-	if (lowestFraction < 1) {
-		return true;
+	for (unsigned int i = 0; i < angList.size(); i++) {
+		if (angList[i]->CalculateRayCollision3D(orig, dir, testIntersection, testLowestFraction) && testLowestFraction < lowestFraction) {
+			hitObject = angList[i];
+			intersectionPt = testIntersection;
+			lowestFraction = testLowestFraction;
+			tIndex = i;
+		}
 	}
-	return false;
-}
-
-bool objectManager::castRay3D(glm::vec3 &orig, glm::vec3 &dir, unsigned int &tIndex, Object** hitObject, glm::vec3 &intersectionPt) {
-	glm::vec3 testIntersection;
-	float lowestFraction = 1;
-	float testLowestFraction;
 
 	for (unsigned int i = 0; i < objList.size(); i++) {
 		if (objList[i]->CalculateRayCollision3D(orig, dir, testIntersection, testLowestFraction) && testLowestFraction < lowestFraction) {
-			*hitObject = objList[i];
+			hitObject = objList[i];
 			intersectionPt = testIntersection;
 			lowestFraction = testLowestFraction;
 			tIndex = i;
 		}
 	}
-
-	return lowestFraction < 1;
-}
-
-bool objectManager::castRay3D(glm::vec3 &orig, glm::vec3 &dir, unsigned int &tIndex, lightObject** hitObject, glm::vec3 &intersectionPt) {
-	glm::vec3 testIntersection;
-	float lowestFraction = 1;
-	float testLowestFraction;
 
 	for (unsigned int i = 0; i < lightList.size(); i++) {
 		if (lightList[i]->CalculateRayCollision3D(orig, dir, testIntersection, testLowestFraction) && testLowestFraction < lowestFraction) {
-			*hitObject = lightList[i];
+			hitObject = lightList[i];
 			intersectionPt = testIntersection;
 			lowestFraction = testLowestFraction;
 			tIndex = i;
 		}
 	}
+
+	
 
 	if (lowestFraction < 1) {
 		return true;
@@ -357,8 +230,7 @@ bool objectManager::castRay3D(glm::vec3 &orig, glm::vec3 &dir, unsigned int &tIn
 
 bool objectManager::traceRay(glm::vec2 &orig, glm::vec2 &dir, unsigned int &tIndex, Object** hitObject, glm::vec2 &intersectionPt) {
 	glm::vec2 testIntersection;
-	float lowestFraction = 2000.0f;
-	float testLowestFraction;
+	float lowestFraction = 2000.0f, testLowestFraction;
 
 	for (unsigned int i = 0; i < objList.size(); i++) {
 		if (objList[i]->CalculateRayCollision(orig, dir, testIntersection, testLowestFraction) && testLowestFraction < lowestFraction) {
@@ -391,11 +263,11 @@ float objectManager::calcAngle(glm::vec2 vec1, glm::vec2 vec2) {
 	return (std::acos(glm::dot(vec1, vec2)) * 180/3.141592654); //No need to divide by magnitude since both vec1 and vec2 are unit vectors.
 }
 
-void objectManager::castRay(lightObject* currentLight, glm::vec2 &origin, glm::vec2 &direction, float alpha, unsigned int depth) {	
+void objectManager::castRay(lightObject* currentLight, glm::vec2 &origin, glm::vec2 &direction, float alpha, unsigned int depth, int id = 0) {
 	
 	if (depth > 20 || alpha < 0.01f) {
 		checkRefIndex(currentLight, origin);
-		currentLight->DrawRay(*rRenderer, origin, origin + direction * 2000.0f, alpha);
+		currentLight->DrawRay(*rRenderer, origin, origin + direction * 2000.0f, alpha, id);
 	}
 	else {
 		unsigned int index = 0;
@@ -405,8 +277,9 @@ void objectManager::castRay(lightObject* currentLight, glm::vec2 &origin, glm::v
 		float angle1, angle2, reflectance;
 
 		if (traceRay(origin, direction, index, &hitObject, intersectionPoint)) {
+
 			angleIntersectionPoint = intersectionPoint;
-			currentLight->DrawRay(*rRenderer, origin, intersectionPoint, alpha);
+			currentLight->DrawRay(*rRenderer, origin, intersectionPoint, alpha, id);
 			glm::vec2 normal = calculateNormal(intersectionPoint, *hitObject);
 			//draw normal
 			//currentLight->DrawRay(*rRenderer, intersectionPoint - normal * 50.0f, intersectionPoint + normal * 50.0f);
@@ -415,9 +288,10 @@ void objectManager::castRay(lightObject* currentLight, glm::vec2 &origin, glm::v
 			case Object::opaque:
 				reflectionDirection = glm::normalize(doReflection(direction, normal));
 				refractionDirection = glm::normalize(doRefraction(direction, normal, currentLight->currentRefractiveIndex, hitObject->refractiveIndex));
-
+				
 				reflectionRayOrigin = (glm::dot(reflectionDirection, normal) < 0) ? intersectionPoint - normal * 0.01f : intersectionPoint + normal * 0.01f;
-				refractionRayOrigin = (glm::dot(glm::normalize(refractionDirection), normal) < 0) ? intersectionPoint - normal * 0.01f : intersectionPoint + normal * 0.01f;
+				refractionRayOrigin = (glm::dot(glm::normalize(refractionDirection), normal) < 0) ? 
+					intersectionPoint - normal * 0.01f : intersectionPoint + normal * 0.01f;
 
 				if (glm::dot(glm::normalize(refractionDirection), normal) < 0) {
 					angleIntersectionPoint += normal * 0.01f;
@@ -426,9 +300,10 @@ void objectManager::castRay(lightObject* currentLight, glm::vec2 &origin, glm::v
 					angleIntersectionPoint -= normal * 0.01f;
 				}
 
-				//Add angle indicator here
-				//Fix swapping the displayed order of refractive indexes.
-				if (castRay3D(checkPoint, direc, index, &this->thing, intersection)) {
+				
+				ObjectTemplate *temp;
+				if (castRay3D(checkPoint, direc, index, temp, intersection)) {
+					this->thing = (Object*)temp;
 					angle1 = calcAngle(normal, direction);
 					angle2 = calcAngle(normal, refractionDirection);
 				}
@@ -437,44 +312,34 @@ void objectManager::castRay(lightObject* currentLight, glm::vec2 &origin, glm::v
 					angle2 = calcAngle(normal, -refractionDirection);
 				}
 				if (currentLight->noOfRays == 1) {
-					addAngleIndicator(angle1, angle2, currentLight->currentRefractiveIndex, hitObject->refractiveIndex, intersectionPoint, glm::vec2(30.0f, 30.0f), "angleIndicator");
+					addAngleIndicator(angle1, angle2, currentLight->currentRefractiveIndex, hitObject->refractiveIndex, intersectionPoint, 
+						glm::vec2(30.0f, 30.0f), "angleIndicator");
 				}
 
 				fresnel(direction, normal, hitObject->refractiveIndex, reflectance);
 
-				//ISSUE: WHEN ANGLE GETS REALLY SMALL, TIR RAYS SEEM TO INCREASE ALPHA VALUE.
-				castRay(currentLight, refractionRayOrigin, refractionDirection, alpha - reflectance, depth + 1);
-				castRay(currentLight, reflectionRayOrigin, reflectionDirection, alpha - (1 - reflectance), depth + 1);
+				castRay(currentLight, refractionRayOrigin, refractionDirection, alpha - reflectance, depth + 1, id);
+				castRay(currentLight, reflectionRayOrigin, reflectionDirection, alpha - (1 - reflectance), depth + 1, id);
 				break;
 
 			case Object::mirror:
 				reflectionDirection = glm::normalize(doReflection(direction, normal));
-				refractionDirection = glm::normalize(doRefraction(direction, normal, currentLight->currentRefractiveIndex, hitObject->refractiveIndex));
+				reflectionRayOrigin = (glm::dot(reflectionDirection, normal) < 0) ? intersectionPoint - normal * 0.01f : intersectionPoint + normal * 0.01f;
+				float angle = calcAngle(normal, direction);
 
-				//Add angle indicator here
-				//Fix swapping the displayed order of refractive indexes.
-				
-				
-				if (castRay3D(checkPoint, direc, index, &this->thing, intersection)) {
-					angle1 = calcAngle(normal, direction);
-					angle2 = calcAngle(normal, refractionDirection);
-				}
-				else {
-					angle1 = calcAngle(normal, -direction);
-					angle2 = calcAngle(normal, -refractionDirection);
-				}
 				if (currentLight->noOfRays == 1) {
-					addAngleIndicator(angle1, angle2, currentLight->currentRefractiveIndex, hitObject->refractiveIndex, intersectionPoint, glm::vec2(30.0f, 30.0f), "angleIndicator");
+					addAngleIndicator(angle, angle, currentLight->currentRefractiveIndex, hitObject->refractiveIndex, intersectionPoint, glm::vec2(30.0f, 30.0f), 
+						"angleIndicator");
 				}
 				fresnel(direction, normal, hitObject->refractiveIndex, reflectance);
 
-				castRay(currentLight, reflectionRayOrigin, reflectionDirection, alpha - (1- reflectance), depth + 1);
+				castRay(currentLight, reflectionRayOrigin, reflectionDirection, alpha, depth + 1);
 				break;
 			}
 			
 		}
 		else {
-			currentLight->DrawRay(*rRenderer, origin, origin + direction * 2000.0f, alpha);
+			currentLight->DrawRay(*rRenderer, origin, origin + direction * 2000.0f, alpha, id);
 		}
 	}
 }
@@ -493,16 +358,17 @@ bool objectManager::doExperiment() {
 				//Increment x coordinate so objects are added next to eachother.
 				positions.x += 100 + gui->objectGap;
 				//Add object with the fixed parameter as true to prevent the user from moving them accidentally.
-				addObject(positions, glm::vec2(100, 500), "sblock", glm::vec4(1.0f), true);
+				addObject(positions, glm::vec2(100, 500), "opaque", glm::vec4(1.0f), true);
 				//Set the refractive indexes for each added object using the data entered in the GUI.
-				objList[i]->refractiveIndex = gui->refractiveIndexes[i];
+				objList[i]->refractiveIndex = abs(gui->refractiveIndexes[i]);
 			}
 		}
 		//add a new light object with angle according to the users input. Set the fixed value to true to prevent accidental movement.
 		addLight(glm::vec2(500, 300), glm::vec2(60, 60), "torch", true);
 		lightList[0]->rotateByAngle(gui->incidenceAngle);
 		
-		//Now that experiment has been carried out, set the active experiment to 0 (no experiment) to prevent the next render loop repeating the experiment.
+		//Now that experiment has been carried out, set the active experiment to 0 (no experiment) to prevent 
+		//the next render loop repeating the experiment.
 		gui->activeExperiment = 0;
 		return true;
 		break;
@@ -513,6 +379,30 @@ bool objectManager::doExperiment() {
 		break;
 	}
 }
+
+void objectManager::deleteTheObject(ObjectTemplate *unwanted) {
+	//Convert base objectTemplate to the child class.
+	Object* obj = dynamic_cast<Object*>(unwanted);
+	lightObject* lObj = dynamic_cast<lightObject*>(unwanted);
+	//Check which type the unwanted object is; light or object?
+	if (obj != nullptr) {
+		//Loop through the array of objects
+		for (unsigned int i = 0; i < objList.size(); i++) {
+			//If the object in the array matches the unwanted object, then erase it.
+			if (obj == objList[i]) {
+				objList.erase(objList.begin() + i);
+			}
+		}
+	}
+	else if (lObj != nullptr) {
+		for (unsigned int i = 0; i < lightList.size(); i++) {
+			if (lObj == lightList[i]) {
+				lightList.erase(lightList.begin() + i);
+			}
+		}
+	}
+}
+
 
 void objectManager::clearAllObjects() {
 	//This function will erase all of the objects on the scene.
@@ -529,37 +419,51 @@ void objectManager::drawAll() {
 
 	//draw all objects.
 	for (unsigned int i = 0; i < objList.size(); i++) {
+		if (objList[i]->material == Object::opaque) {
+			objList[i]->Sprite = ResourceManager::GetTexture("opaque");
+		}
+		else {
+			objList[i]->Sprite = ResourceManager::GetTexture("mirror");
+		}
 		objList[i]->Draw(*Renderer);
 	}
+
+	
+
 	//draw all light sources and carry out ray tracing.
 	for (unsigned int i = 0; i < lightList.size(); i++) {
+		//Draw light source
 		lightList[i]->Draw(*Renderer);
+		//check if the light is turned off
 		if (!lightList[i]->turnedOff) {
-			checkRefIndex(lightList[i], lightList[i]->rayOrigin);
+			//Check if the number of rays is more than 1
 			if (lightList[i]->noOfRays == 1) {
+				checkRefIndex(lightList[i], lightList[i]->rayOrigin);
 				castRay(lightList[i], lightList[i]->rayOrigin, lightList[i]->rayDirection, 1.0f, 0);
 			}
 			else {
+				//If the number of rays is more than one, call the createOrigins() function to calculate where to place
+				//each ray
 				lightList[i]->createOrigins();
 				for (int j = 0; j < lightList[i]->noOfRays; j++) {
-					castRay(lightList[i], lightList[i]->rayOrigins[j], lightList[i]->rayDirection, 1.0f, 0);
+					checkRefIndex(lightList[i], lightList[i]->rayOrigin);
+					castRay(lightList[i], lightList[i]->rayOrigins[j], lightList[i]->rayDirection, 1.0f, 0, j+1);
 				}
 				lightList[i]->rayOrigins.clear();
 			}
 		}
 	}
 	//Render the angle indicators. The user can click on these to view infomation about what happened to the ray after it hit the surface.
-	for (unsigned int i = 0; i < angList.size(); i++) {
-		angList[i]->Draw(*Renderer);
-	}
+	//for (unsigned int i = 0; i < angList.size(); i++) {
+		//angList[i]->Draw(*Renderer);
+	//}
 	//Booleans used for adding to/editing the scene.
 	bool addLight = false;
 	bool addObject = false;
 	bool clearSc = false;
 	//Render GUI.
 	gui->prepareNewFrame();
-	//gui->createObjectDetailsWindow(selectedObject, selectedLight, selectedIndicator);
-	gui->createSceneManagerWindow(clearSc, addObject, addLight, selectedObject, selectedLight, selectedIndicator, angList);
+	gui->createSceneManagerWindow(clearSc, addObject, addLight, *selectedObject, angList);
 	gui->displayNumbers(angList);
 	gui->renderNewFrame();
 	//If the user clicks to add an object, then the object will be added and rendered to the scene on the next frame.
@@ -567,7 +471,7 @@ void objectManager::drawAll() {
 		this->addLight(glm::vec2(500.0f, 200.0f), glm::vec2(60.0f, 60.0f), "torch");
 	}
 	else if (addObject) {
-		this->addObject(glm::vec2(800.0f, 200.0f), glm::vec2(100.0f, 100.0f), "sblock");
+		this->addObject(glm::vec2(800.0f, 200.0f), gui->objData.size, "opaque");
 	}
 	else if (clearSc) {
 		clearAllObjects();

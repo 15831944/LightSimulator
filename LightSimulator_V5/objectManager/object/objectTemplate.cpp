@@ -12,6 +12,7 @@ ObjectTemplate::ObjectTemplate(glm::vec2 pos, glm::vec2 size, Texture2D sprite, 
 
 void ObjectTemplate::moveObject(glm::vec2 newPos) {
 	this->Position = glm::vec3(newPos, 0.0f);
+	printf("x: %f, Y: %f\n", newPos.x, newPos.y);
 }
 
 void ObjectTemplate::rotateObject(float angle) {
@@ -21,16 +22,18 @@ void ObjectTemplate::rotateObject(float angle) {
 bool ObjectTemplate::clipLine(int dimension, const glm::vec3& origin, const glm::vec3& end, float& f_low, float& f_high) {
 	float f_dim_low, f_dim_high; //dimension specific low and high values.
 
+	//find upper and lower bounds of the object (top left and borrom right)
 	f_dim_high = (this->Position[dimension] - origin[dimension]) / (end[dimension] - origin[dimension]);
 	f_dim_low = ((this->Position[dimension] + this->Size[dimension]) - origin[dimension]) / (end[dimension] - origin[dimension]);
 
-
+	//Swap variables if in the wrong order
 	if (f_dim_high < f_dim_low) {
 		float temp = f_dim_high;
 		f_dim_high = f_dim_low;
 		f_dim_low = temp;
 	}
 
+	//Check if ray intersects with object on current axis
 	if (f_dim_high < f_low) {
 		return false;
 	}
@@ -42,6 +45,7 @@ bool ObjectTemplate::clipLine(int dimension, const glm::vec3& origin, const glm:
 	f_low = std::max(f_dim_low, f_low);
 	f_high = std::min(f_dim_high, f_high);
 
+	//If ray intersects, f_low will be higher than f_high
 	if (f_low > f_high) {
 		return false;
 	}
@@ -92,5 +96,6 @@ bool ObjectTemplate::CalculateRayCollision3D(glm::vec3 &rOrigin, glm::vec3 &rDir
 
 void ObjectTemplate::Draw(SpriteRenderer &renderer)
 {
+	//calls the function inside the spriteRenderer class
 	renderer.DrawSprite(this->Sprite, this->Position, this->Size, this->Rotation, this->Color);
 }

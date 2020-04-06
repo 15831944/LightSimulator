@@ -15,7 +15,7 @@ void guiManager::renderNewFrame() {
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
 
-void guiManager::createSceneManagerWindow(bool &clearScene, bool &addOb, bool &addlightOb, Object *&ob, lightObject *&lightOb, angleIndicator *&ind, std::vector<angleIndicator*> angleArray) {
+void guiManager::createSceneManagerWindow(bool &clearScene, bool &addOb, bool &addlightOb, ObjectTemplate &object, std::vector<angleIndicator*> angleArray) {
 	if (no_titlebar)		window_flags |= ImGuiWindowFlags_NoTitleBar;
 	if (no_move)            window_flags |= ImGuiWindowFlags_NoMove;
 	if (no_resize)          window_flags |= ImGuiWindowFlags_NoResize;
@@ -25,6 +25,10 @@ void guiManager::createSceneManagerWindow(bool &clearScene, bool &addOb, bool &a
 	
 	ImGui::BeginTabBar("tabBar");
 	if (ImGui::BeginTabItem("Object Info")) {
+		Object* ob = dynamic_cast<Object*>(&object);
+		lightObject* lightOb = dynamic_cast<lightObject*>(&object);
+		angleIndicator* ind = dynamic_cast<angleIndicator*>(&object);
+
 		if (ob != nullptr) {
 			ImGui::Text("Object");
 			ImGui::InputFloat("Refractive Index", &ob->refractiveIndex, 0.01f, 0.01f, 3);
@@ -43,9 +47,12 @@ void guiManager::createSceneManagerWindow(bool &clearScene, bool &addOb, bool &a
 			ImGui::SliderFloat("B", &lightOb->rayColour.b, 0.0f, 1.0f);
 			ImGui::Text("");
 			ImGui::Text("");
+			ImGui::SliderInt("Rays", &lightOb->noOfRays, 1, 300);
+			ImGui::Text("");
 			ImGui::Checkbox("Fixed", &lightOb->FixedPosition);
 			ImGui::Text("");
 			ImGui::Checkbox("Turn Off", &lightOb->turnedOff);
+			
 		}
 		else if (ind != nullptr) {
 			std::string a1, a2, ri1, ri2;
@@ -69,6 +76,29 @@ void guiManager::createSceneManagerWindow(bool &clearScene, bool &addOb, bool &a
 		ImGui::EndTabItem();
 	}
 	if (ImGui::BeginTabItem("Scene Settings")) {
+		ImGui::Text("ENTER DATA FOR NEW OBJECT:");
+		ImGui::Checkbox("mirror", &objData.isMirror);
+		ImGui::InputFloat("Refractive Index", &objData.refIndex);
+		ImGui::SliderFloat("Size x", &objData.size.x, 10.0f, 500.0f);
+		ImGui::SliderFloat("Size y", &objData.size.y, 10.0f, 500.0f);
+		
+		ImGui::Text("");
+		ImGui::Text("");
+		ImGui::Text("");
+
+		ImGui::Text("ENTER DATA FOR NEW LIGHT:");
+		ImGui::Checkbox("Turned Off", &lightData.turnOff);
+		ImGui::SliderInt("Number of rays", &lightData.noRays, 1, 300);
+		ImGui::Text("light colour");
+		ImGui::SliderFloat("R", &lightData.colour.r, 0.0f, 1.0f);
+		ImGui::Text("");
+		ImGui::SliderFloat("G", &lightData.colour.g, 0.0f, 1.0f);
+		ImGui::Text("");
+		ImGui::SliderFloat("B", &lightData.colour.b, 0.0f, 1.0f);
+		
+		ImGui::Text("");
+		ImGui::Text("");
+
 		if (ImGui::Button("Add Object")) {
 			addOb = true;
 		}
@@ -86,11 +116,12 @@ void guiManager::createSceneManagerWindow(bool &clearScene, bool &addOb, bool &a
 		ImGui::EndTabItem();
 	}
 	if (ImGui::BeginTabItem("Experiments")) {
-		ImGui::Text("Add experiments here that will display graphs");
+		ImGui::Text("Carry out experiments here:");
 		ImGui::Text("");
 
 		if (ImGui::CollapsingHeader("Measuring angles with multiple objects")) {
-			ImGui::Text("Align objects in a row and measure how the angle of the light changes with different refractive indexes.");
+			ImGui::Text("Align objects in a row and measure how the angle");
+			ImGui::Text("of the light changes with different refractive indexes.");
 			ImGui::Text("Enter refractive indexes for the objects:");
 			ImGui::InputFloat("Object 1", &refractiveIndexes[0], 0.01f, 0.01f, 3);
 			ImGui::InputFloat("Object 2", &refractiveIndexes[1], 0.01f, 0.01f, 3);
@@ -144,12 +175,16 @@ void guiManager::displayNumbers(std::vector<angleIndicator*> data) {
 
 void guiManager::displayResults(std::vector<angleIndicator*> data) {
 	std::string text;
+	//loop through all the angle indicators and read their attributes that contain the angles.
 	for (unsigned int i = 0; i < data.size(); i++) {
 		ImGui::Text("");
+		//Output which angle the data is referring to
 		text = "ANGLE " + std::to_string(i + 1);
 		ImGui::Text(text.c_str());
+		//Output angle of incidence
 		text = "Angle 1: " + std::to_string(data[i]->iAngle);
 		ImGui::Text(text.c_str());
+		//Output angle of reflection/refraction.
 		text = "Angle 2: " + std::to_string(data[i]->rAngle);
 		ImGui::Text(text.c_str());
 		ImGui::Text("");

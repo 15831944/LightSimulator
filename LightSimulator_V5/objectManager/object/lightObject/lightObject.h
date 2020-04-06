@@ -19,7 +19,7 @@ public:
 	glm::vec2 rayDirection; //unit vector
 	glm::vec2 rayOrigin, rayEnd; //(x1, y1)
 	glm::vec3 rayColour;
-	int noOfRays = 2;
+	int noOfRays = 10;
 	std::vector<glm::vec2> rayOrigins;
 	bool turnedOff = false;
 
@@ -29,7 +29,7 @@ public:
 
 	lightObject(glm::vec2 pos, glm::vec2 size, Texture2D sprite, bool fixed = false);
 	void Draw(SpriteRenderer &renderer);
-	void DrawRay(RayRenderer &renderer, glm::vec2 v0, glm::vec2 v1, float alphaValue);
+	void DrawRay(RayRenderer &renderer, glm::vec2 v0, glm::vec2 v1, float alphaValue, int id);
 	void moveObject(glm::vec2 newPos);
 	void rotateObject(float angle);
 	float calculateAngle(glm::vec2 rayDir, glm::vec2 normal);

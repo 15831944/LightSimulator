@@ -19,7 +19,8 @@ lightObject::lightObject(glm::vec2 pos, glm::vec2 size, Texture2D sprite, bool f
 	rayOrigin.x = 0.5f * size.x + pos.x;
 	rayOrigin.y = 0.5f * size.y + pos.y;
 	//Add an object that the lightObject will rotate towards.
-	directionIndicator = new ObjectTemplate(rayOrigin + rayDirection * 100.0f, glm::vec2(20.0f, 20.0f), ResourceManager::GetTexture("angleIndicator"));
+	directionIndicator = new ObjectTemplate(rayOrigin + rayDirection * 100.0f, 
+		glm::vec2(20.0f, 20.0f), ResourceManager::GetTexture("angleIndicator"));
 	rotateToIndicator();
 }
 
@@ -28,22 +29,25 @@ void lightObject::Draw(SpriteRenderer &renderer)
 	rotateToIndicator(); //Call the rotate function here so that the ray direction updates while the indicator is being moved by the user.
 	renderer.DrawSprite(this->Sprite, this->Position, this->Size, this->Rotation, this->Color); //draw the light
 	//draw the indicator
-	renderer.DrawSprite(this->directionIndicator->Sprite, this->directionIndicator->Position, this->directionIndicator->Size, this->directionIndicator->Rotation, this->directionIndicator->Color);
+	renderer.DrawSprite(this->directionIndicator->Sprite, this->directionIndicator->Position, this->directionIndicator->Size, 
+		this->directionIndicator->Rotation, this->directionIndicator->Color);
 }
 
-void lightObject::DrawRay(RayRenderer &renderer, glm::vec2 v0, glm::vec2 v1, float alphaValue) {
+void lightObject::DrawRay(RayRenderer &renderer, glm::vec2 v0, glm::vec2 v1, float alphaValue, int id = 0) {
 	renderer.Draw(v0, v1, this->rayColour, alphaValue);
 }
 
 void lightObject::createOrigins() {
-	glm::vec2 topSide = glm::vec2(Position.x + (Size.x / 1), Position.y);
-	glm::vec2 lowSide = glm::vec2(Position.x + (Size.x / 1), Position.y + Size.y);
-	
+	//Create vectors to declare a space for the rays to be rendered from.
+	glm::vec2 topSide = glm::vec2(Position.x + Size.x * 0.5 - sin(PI / 2 - this->Rotation) * Size.x * 0.5, 
+		Position.y + Size.y * 0.5  - cos(PI / 2 - this->Rotation) * Size.y * 0.5);
+	glm::vec2 lowSide = glm::vec2(Position.x + Size.x * 0.5 + sin(PI / 2 - this->Rotation) * Size.x * 0.5, 
+		Position.y + Size.y * 0.5 + cos(PI/2 - this->Rotation) * Size.y * 0.5);
+	//Create a line from the vectors
 	glm::vec2 ThisDirection = glm::normalize(lowSide - topSide);
-
-	float length = sqrt((topSide.x - lowSide.x) * (topSide.x - lowSide.x) + (topSide.y - lowSide.y) * (topSide.y - lowSide.y));
-	float rayRatio = length / (noOfRays + 1);
-
+	//Calculate the spacing between each ray
+	float rayRatio = ((Size.y + Size.x)/2) / (noOfRays + 1);
+	//Add the rays to an std::vector array to then be rendered.
 	for (int i = 1; i <= noOfRays; i++) {
 		rayOrigins.push_back(topSide + (ThisDirection * (i * rayRatio)));
 	}
@@ -82,11 +86,12 @@ void lightObject::rotateToMouse(glm::vec3 coords) {
 }
 
 void lightObject::rotateToIndicator() {
-	glm::vec2 coords2D = glm::vec2(this->directionIndicator->Position.x + (this->directionIndicator->Size.x / 2), this->directionIndicator->Position.y + (this->directionIndicator->Size.y / 2));
+	glm::vec2 coords2D = glm::vec2(this->directionIndicator->Position.x + (this->directionIndicator->Size.x / 2), 
+		this->directionIndicator->Position.y + (this->directionIndicator->Size.y / 2));
 	glm::vec2 directionVec = glm::normalize(coords2D - this->rayOrigin);//calculate new direction vector.
 	float angle = calculateAngle(directionVec, glm::vec2(0.0f, -1.0f));//calc angle between north and direction vector.
 
-	if (directionVec.x < 0) //if thex value is negative, then the angle is reflex.
+	if (directionVec.x < 0) //if the x value is negative, then the angle is reflex.
 	{
 		this->rotateObject((PI * 2) - angle);//calculate reflex angle (from PI to 2*PI).
 	}

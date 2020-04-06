@@ -30,9 +30,9 @@ void Program::Init()
 
 	ResourceManager::GetShader("lightRay").Use().SetMatrix4("projection", projection);
 	// Load textures
-	ResourceManager::LoadTexture("sBlock.png", GL_TRUE, "sblock");
+	ResourceManager::LoadTexture("sBlock.png", GL_TRUE, "opaque");
 	ResourceManager::LoadTexture("torch.png", GL_TRUE, "torch");
-	ResourceManager::LoadTexture("block.png", GL_TRUE, "block");
+	ResourceManager::LoadTexture("mirror.png", GL_TRUE, "mirror");
 	ResourceManager::LoadTexture("angleIndicatorIcon.png", GL_TRUE, "angleIndicator");
 	// Set render-specific controls
 	Shader quadShader;
@@ -42,9 +42,9 @@ void Program::Init()
 	//create object manager
 	oManager = new objectManager(quadShader, rayShader);
 	//create default objects
-	oManager->addObject(glm::vec2(900, 550), glm::vec2(200, 200), "sblock");
+	oManager->addObject(glm::vec2(901, 550), glm::vec2(200, 200), "opaque");
 	oManager->addLight(glm::vec2(500, 570), glm::vec2(60, 60), "torch");
-	//oManager->addLight(glm::vec2(600, 670), glm::vec2(150, 30), "block");
+	
 }
 
 void Program::Update(GLfloat dt)
@@ -56,21 +56,13 @@ void Program::Update(GLfloat dt)
 void Program::ProcessInput(GLfloat dt)
 {
 	if(this->State == PROGRAM_ACTIVE) {
-		//select and deselect objects.
-		/*if(this->mouse[GLFW_MOUSE_BUTTON_1]) {
-			oManager->selectObject(glm::vec3((float)mouseX, (float)mouseY, 1.0f), true, this->mouse[GLFW_MOUSE_BUTTON_1], Keys[GLFW_KEY_E], Keys[GLFW_KEY_R]);
-		}*/
-
 		oManager->selectObject(glm::vec3((float)mouseX, (float)mouseY, 1.0f), this->mouse[GLFW_MOUSE_BUTTON_1], this->mouse[GLFW_MOUSE_BUTTON_2]);
 
 		//Dynamically adding objects
-		if (this->mouse[GLFW_MOUSE_BUTTON_3]) {
+		if (this->mouse[GLFW_MOUSE_BUTTON_3]) {//When the middle mouse button is clicked, a default opaque block is added.
 			oManager->addObject(glm::vec2((float)mouseX, (float)mouseY), glm::vec2(100, 100), "sblock");
 			this->mouse[GLFW_MOUSE_BUTTON_3] = 0;
 		}
-		/*if (this->mouse[GLFW_MOUSE_BUTTON_2]) {
-			oManager->addLight(glm::vec2((float)mouseX, (float)mouseY), glm::vec2(40, 40), "block");
-		}*/
 	}
 }
 

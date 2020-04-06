@@ -137,10 +137,12 @@
     <ClCompile Include="..\..\..\..\Desktop\OpenGL\imgui\imgui_impl_glfw.cpp" />
     <ClCompile Include="..\..\..\..\Desktop\OpenGL\imgui\imgui_impl_opengl3.cpp" />
     <ClCompile Include="..\..\..\..\Desktop\OpenGL\imgui\imgui_widgets.cpp" />
+    <ClCompile Include="databaseManager\dbManager.cpp" />
     <ClCompile Include="guiManager\guiManager.cpp" />
     <ClCompile Include="main\main.cpp" />
     <ClCompile Include="objectManager\objectManager.cpp" />
     <ClCompile Include="objectManager\object\angleIndicator\angleIndicator.cpp" />
+    <ClCompile Include="objectManager\object\lensObject\lensObject.cpp" />
     <ClCompile Include="objectManager\object\lightObject\lightObject.cpp" />
     <ClCompile Include="objectManager\object\object.cpp" />
     <ClCompile Include="objectManager\object\objectTemplate.cpp" />
@@ -160,9 +162,11 @@
     <ClInclude Include="..\..\..\..\Desktop\OpenGL\imgui\imstb_rectpack.h" />
     <ClInclude Include="..\..\..\..\Desktop\OpenGL\imgui\imstb_textedit.h" />
     <ClInclude Include="..\..\..\..\Desktop\OpenGL\imgui\imstb_truetype.h" />
+    <ClInclude Include="databaseManager\dbManager.h" />
     <ClInclude Include="guiManager\guiManager.h" />
     <ClInclude Include="objectManager\objectManager.h" />
     <ClInclude Include="objectManager\object\angleIndicator\angleIndicator.h" />
+    <ClInclude Include="objectManager\object\lensObject\lensObject.h" />
     <ClInclude Include="objectManager\object\lightObject\lightObject.h" />
     <ClInclude Include="objectManager\object\object.h" />
     <ClInclude Include="objectManager\object\objectTemplate.h" />

@@ -21,7 +21,18 @@ public:
 	const static bool no_move = true;
 	const static bool no_resize = true;
 	ImGuiWindowFlags window_flags = 0;
-	
+
+	struct addObjData {
+		glm::vec2 size = glm::vec2(200.0f, 200.0f);
+		float refIndex = 1.5f;
+		bool isMirror = false;
+	}objData;
+
+	struct addLightData {
+		int noRays = 1;
+		glm::vec3 colour = glm::vec3(1.0f);
+		bool turnOff = false;
+	}lightData;
 
 	/*
 	0 = No experiment
@@ -37,7 +48,7 @@ public:
 	guiManager();
 	void prepareNewFrame();
 	void renderNewFrame();
-	void createSceneManagerWindow(bool &clearScene, bool &addOb, bool &addlightOb, Object *&ob, lightObject *&lightOb, angleIndicator *&ind, std::vector<angleIndicator*> angleArray);
+	void createSceneManagerWindow(bool &clearScene, bool &addOb, bool &addlightOb, ObjectTemplate &object, std::vector<angleIndicator*> angleArray);
 	void displayResults(std::vector<angleIndicator*> data);
 	void displayNumbers(std::vector<angleIndicator*> data);
 };

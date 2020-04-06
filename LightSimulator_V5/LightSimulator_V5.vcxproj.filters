@@ -58,6 +58,12 @@
     <Filter Include="Source Files\objectManager\object\angleIndicator">
       <UniqueIdentifier>{4e861f64-f3b7-4b38-8a49-6b8c4eb143ef}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\objectManager\object\lensObject">
+      <UniqueIdentifier>{740cefe1-8b40-4d4e-91fe-4e32ee63f5b7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\databaseManager">
+      <UniqueIdentifier>{522ce7e9-6f73-4fe8-8c71-bca4bfbc49a4}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\..\Desktop\OpenGL\glad\src\glad.c">
@@ -120,6 +126,12 @@
     <ClCompile Include="objectManager\objectManager.cpp">
       <Filter>Source Files\objectManager</Filter>
     </ClCompile>
+    <ClCompile Include="objectManager\object\lensObject\lensObject.cpp">
+      <Filter>Source Files\objectManager\object\lensObject</Filter>
+    </ClCompile>
+    <ClCompile Include="databaseManager\dbManager.cpp">
+      <Filter>Source Files\databaseManager</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="guiManager\guiManager.h">
@@ -181,6 +193,12 @@
     </ClInclude>
     <ClInclude Include="objectManager\object\objectTemplate.h">
       <Filter>Source Files\objectManager\object</Filter>
+    </ClInclude>
+    <ClInclude Include="objectManager\object\lensObject\lensObject.h">
+      <Filter>Source Files\objectManager\object\lensObject</Filter>
+    </ClInclude>
+    <ClInclude Include="databaseManager\dbManager.h">
+      <Filter>Source Files\databaseManager</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
